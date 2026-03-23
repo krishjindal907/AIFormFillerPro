@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Verification - NeoVault Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin: 0; padding: 0; min-height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; font-family: 'Open Sans', sans-serif; position: relative; overflow: hidden; color: #fff;">
+    <!-- Deep Neon Atmospheric Glow -->
+    <div style="position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 60%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"></div>
+    
+    <div style="position: absolute; inset: 0; background-size: 50px 50px; background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); pointer-events: none; animation: panGrid 60s linear infinite;"></div>
+
+    <style>
+        @keyframes panGrid { 0% { background-position: 0 0; } 100% { background-position: 1000px 1000px; } }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .dev-input { width: 100%; padding: 15px; background: rgba(15, 23, 42, 0.6); border: 2px solid rgba(255,255,255,0.1); border-radius: 8px; color: #10b981; font-size: 1.5rem; text-align: center; letter-spacing: 15px; font-weight: 800; box-sizing: border-box; transition: all 0.2s; font-family: monospace; }
+        .dev-input:focus { outline: none; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+        .dev-label { display: block; margin-bottom: 12px; font-size: 0.9rem; font-weight: 600; color: #94a3b8; text-align: center; }
+        .dev-btn { width: 100%; padding: 14px; background: #10b981; color: #000; border: none; border-radius: 8px; font-size: 1.05rem; font-weight: 800; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .dev-btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    </style>
+
+    <div style="z-index: 10; width: 100%; max-width: 400px; padding: 40px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); animation: fadeUp 0.6s ease-out;">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+             <i class="fa-solid fa-fingerprint" style="font-size: 3rem; background: linear-gradient(135deg, #34d399, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px;"></i>
+             <h2 style="margin: 0 0 8px 0; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">2FA Verification</h2>
+             <p style="color: #94a3b8; font-size: 0.95rem; margin: 0; line-height: 1.5;">Credentials verified.<br>Please enter your 6-digit access token.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 12px; border-radius: 8px; margin-bottom: 25px; text-align: center; font-size: 0.85rem; font-weight: 600;">
+                        <i class="fa-solid fa-shield-halved"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.otp_verify') }}">
+            <div style="margin-bottom: 25px;">
+                <label class="dev-label">6-DIGIT SECURITY TOKEN</label>
+                <input type="text" name="otp" class="dev-input" required maxlength="6" autocomplete="off" autofocus placeholder="------">
+            </div>
+            
+            <button type="submit" class="dev-btn">
+                Authorize Session <i class="fa-solid fa-unlock-keyhole" style="margin-left: 5px;"></i>
+            </button>
+        </form>
+        
+        <div style="margin-top: 25px; text-align: center;">
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">
+                <a href="{{ url_for('auth.login') }}" style="color: #94a3b8; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,0.2);">Cancel and return to login</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

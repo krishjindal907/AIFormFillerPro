@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="animate-up" style="max-width: 800px; margin: 0 auto; width: 100%;">
+    <h2><i class="fa-regular fa-file-lines"></i> Smart Registration Form</h2>
+    <p>Review the AI suggestions before applying them to the form.</p>
+
+    <div class="grid-2" style="margin-bottom: 2rem;">
+        <!-- AI Preview Panel -->
+        <div class="glass-card" style="border: 2px dashed var(--primary);">
+            <h4><i class="fa-solid fa-wand-magic-sparkles"></i> AI Pre-fill Suggestions</h4>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Name</span>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">{{ extraction.name or current_user.name or 'Manual' }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Age</span>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">{{ extraction.age or current_user.age or 'Manual' }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted); font-size: 0.9rem;">Profession</span>
+                    <span class="badge" style="background: var(--primary-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">{{ extraction.profession or current_user.profession or 'Manual' }}</span>
+                </div>
+            </div>
+            <button type="button" id="autofill-btn" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">Apply Suggestions</button>
+        </div>
+
+        <!-- The Actual Form -->
+        <div class="glass-card">
+            <form id="final-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="form_name" class="form-control" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="form_age" class="form-control" placeholder="Enter age">
+                </div>
+                <div class="form-group">
+                    <label>Profession</label>
+                    <input type="text" id="form_profession" class="form-control" placeholder="Enter profession">
+                </div>
+                <button type="button" id="submit-form-btn" class="btn-primary" style="width: 100%; margin-top: 1rem;">Submit Form</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Modal (Hidden initially) -->
+    <div id="feedback-panel" class="glass-card animate-up" style="display: none; text-align: center; background: var(--success-light); border-color: var(--success);">
+        <h3 style="color: var(--success);"><i class="fa-regular fa-circle-check"></i> Form Submitted Successfully!</h3>
+        <p style="margin-bottom: 1.5rem;">Help us map the future. Were the AI suggestions accurate?</p>
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <button class="btn-primary feedback-btn" data-val="true" style="background: var(--success);"><i class="fa-solid fa-thumbs-up"></i> Yes, perfect!</button>
+            <button class="btn-primary feedback-btn" data-val="false" style="background: var(--danger);"><i class="fa-solid fa-thumbs-down"></i> No, Needs improvement</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const extractedData = {
+        id: "{{ extraction.id if extraction else '' }}",
+        name: "{{ extraction.name if extraction else current_user.name }}",
+        age: "{{ extraction.age if extraction else current_user.age }}",
+        profession: "{{ extraction.profession if extraction else current_user.profession }}"
+    };
+</script>
+{% endblock %}

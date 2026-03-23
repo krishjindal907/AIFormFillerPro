@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+    <div>
+        <h1 class="page-title" style="margin-bottom: 5px;"><i class="fa-solid fa-satellite-dish" style="color: var(--primary);"></i> Intelligence Ingestion Node</h1>
+        <p style="color: var(--text-secondary); font-weight: 600; margin: 0;">Securely parse and encrypt verified documents into your NeoVault matrix.</p>
+    </div>
+    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; padding: 10px 18px; border-radius: 30px; font-weight: 800; font-size: 0.9rem; letter-spacing: 1px;">
+        <i class="fa-solid fa-circle-dot fa-fade" style="margin-right: 8px;"></i> SECURE CONNECTION
+    </div>
+</div>
+
+<div class="bento-card animate-up" style="max-width: 750px; padding: 40px; border-top: 4px solid var(--primary);">
+    <h3 style="margin-top: 0; color: var(--text-primary); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px;"><i class="fa-solid fa-file-shield" style="color: var(--primary);"></i> Encrypted Document Upload Payload</h3>
+    <p style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.6; font-weight: 500; font-size: 1.05rem;">Select the intelligence vector category. Your NeoVault architecture utilizes military-grade OCR scanning to extract and deploy demographic data locally, completely isolated from external tracking servers.</p>
+    
+    <form id="doc-upload-form">
+        <div class="form-group">
+            <label>Official Document Category</label>
+            <select name="doc_type" class="form-control" required style="margin-bottom: 20px; cursor: pointer;">
+                <option value="Aadhar Card">Aadhar Card</option>
+                <option value="PAN Card">PAN Card</option>
+                <option value="Driving License">Driving License</option>
+                <option value="10th Marksheet">10th / 12th Marksheet</option>
+                <option value="Resume / CV">Resume / CV</option>
+                <option value="Generic Information Document">Other Generic Output</option>
+            </select>
+        </div>
+        
+        <div class="dropzone" id="dropzoneWrapper" style="border: 2px dashed rgba(59, 130, 246, 0.5); border-radius: 16px; padding: 50px 20px; background: rgba(59, 130, 246, 0.03); transition: all 0.3s; position: relative; overflow: hidden; margin-top: 25px;">
+            <div style="position: absolute; top:0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: scanline 3s linear infinite; opacity: 0.6;"></div>
+            <i class="fa-solid fa-file-arrow-up" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.3));"></i>
+            <h4 style="margin: 0 0 10px 0; color: var(--text-primary); font-weight: 800; font-size: 1.25rem;">Initialize File Transfer Protocol</h4>
+            <p style="margin: 0; color: var(--text-secondary); font-weight: 600;">Drag & Drop your secure PDF or Image payload here</p>
+            <input type="file" id="fileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" style="opacity: 0; position: absolute; left: -9999px;">
+            <style>
+                @keyframes scanline { 0% { transform: translateY(-50px); } 100% { transform: translateY(200px); } }
+            </style>
+        </div>
+        <div id="file-name-display" style="margin-top: 15px; font-weight: 600; color: var(--primary); text-align: center;"></div>
+        
+        <button type="submit" class="btn btn-primary" id="upload-btn" style="width: 100%; margin-top: 30px; padding: 18px; font-size: 1.2rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; box-shadow: 0 8px 25px rgba(0,65,121,0.3);">
+            <i class="fa-solid fa-lock"></i> Store payload in Secure Vault & Extract OSIND
+        </button>
+    </form>
+</div>
+
+<script>
+    const dropzone = document.getElementById('dropzoneWrapper');
+    const fileInput = document.getElementById('fileInput');
+    const display = document.getElementById('file-name-display');
+    const form = document.getElementById('doc-upload-form');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+    function preventDefaults (e) {
+        e.preventDefault(); e.stopPropagation();
+    }
+    
+    dropzone.addEventListener('click', () => fileInput.click());
+    
+    fileInput.addEventListener('change', () => {
+        if(fileInput.files.length > 0) {
+            display.innerHTML = `<i class="fa-solid fa-check-circle"></i> Selected: ${fileInput.files[0].name}`;
+            dropzone.style.borderColor = "var(--success)";
+            dropzone.style.backgroundColor = "#d4edda";
+        }
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        fileInput.files = files;
+        fileInput.dispatchEvent(new Event('change'));
+    });
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if(!fileInput.files.length) return alert("Please select a document to secure.");
+        
+        const btn = document.getElementById('upload-btn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Extracting & Securing...';
+        btn.disabled = true;
+        
+        const fd = new FormData();
+        fd.append('doc_type', form.doc_type.value);
+        fd.append('document', fileInput.files[0]);
+        
+        try {
+            const res = await fetch('/api/upload_doc', { method: 'POST', body: fd });
+            const data = await res.json();
+            if(data.status === 'success') {
+                alert("Document successfully secured in your DigiLocker Drive!\nThe AI has fully extracted its text into your Universal Knowledge Vault.");
+                window.location.href = '/';
+            } else {
+                alert("Vault Extraction Error: " + data.message);
+            }
+        } catch(err) {
+            alert("Network Error uploading document.");
+        }
+        
+        btn.innerHTML = '<i class="fa-solid fa-lock"></i> Store in Secure Vault & Extract';
+        btn.disabled = false;
+    });
+</script>
+{% endblock %}

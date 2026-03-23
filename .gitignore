@@ -1,0 +1,30 @@
+# Development Environments
+venv/
+env/
+.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables & Secrets
+.env
+.flaskenv
+
+# Database Files
+database.db
+*.sqlite
+*.sqlite3
+instance/
+
+# User Uploads & Vaults (Critical Security)
+static/uploads/
+
+# IDE Configs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db

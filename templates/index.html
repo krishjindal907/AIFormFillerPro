@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Premium Dashboard Metrics */
+    .dash-metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    .metric-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
+    .metric-icon {
+        width: 65px; height: 65px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    }
+    .metric-content h4 { margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 800; letter-spacing: 1.5px; }
+    .metric-content .value { margin: 0; font-size: 2.2rem; font-weight: 900; color: var(--text-primary); letter-spacing: -1px; }
+    
+    /* Layout Split */
+    .dash-main {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 35px;
+    }
+    @media (max-width: 1050px) { .dash-main { grid-template-columns: 1fr; } }
+    
+    /* Table Overflow Fix & Styling */
+    .table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: #fff;
+    }
+    .table-container table { margin: 0; width: 100%; min-width: 350px; border-collapse: collapse; }
+    .table-container th { background: #f8fafc; padding: 14px 15px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; border-bottom: 2px solid var(--border-color); text-align: left;}
+    .table-container td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+    .table-container tr:last-child td { border-bottom: none; }
+    .url-cell { word-break: break-all; max-width: 200px; white-space: normal; line-height: 1.4; font-family: monospace; color: var(--primary); font-weight: 600;}
+</style>
+
+<!-- Dashboard Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+    <div>
+        <h1 class="page-title" style="margin-bottom: 5px;"><i class="fa-solid fa-house-chimney" style="color: var(--primary);"></i> Central Dashboard</h1>
+        <p style="color: var(--text-secondary); margin: 0; font-weight: 600; font-size: 1.05rem;">Welcome back. Here is your digitized asset overview.</p>
+    </div>
+    <a href="{{ url_for('profile.profile') }}" class="btn btn-primary" style="padding: 14px 28px; box-shadow: 0 6px 20px rgba(0,65,121,0.25); border-radius: 8px; font-weight: 800; font-size: 1.05rem;"><i class="fa-solid fa-cloud-arrow-up"></i> Append New Document</a>
+</div>
+
+<!-- TOP METRICS -->
+<div class="dash-metrics animate-up">
+    <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="fa-solid fa-shield-check"></i></div>
+        <div class="metric-content">
+            <h4>Documents Secured</h4>
+            <div class="value">{{ docs|length }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(0, 161, 255, 0.1); color: var(--accent);"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <div class="metric-content">
+            <h4>Forms Auto-Filled</h4>
+            <div class="value">{{ history|length }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fa-solid fa-id-card-clip"></i></div>
+        <div class="metric-content">
+            <h4>Identity Setup</h4>
+            <div class="value">{{ current_user.profile_completion }}%</div>
+        </div>
+    </div>
+</div>
+
+<div class="dash-main animate-up" style="animation-delay: 0.1s;">
+    
+    <!-- LEFT PANEL: Documents Drive -->
+    <div>
+        <h3 style="font-size: 1.35rem; color: var(--text-primary); font-weight: 900; margin: 0 0 25px 0; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;">
+            <i class="fa-solid fa-folder-closed" style="color: var(--primary);"></i> Issued Identity Documents
+        </h3>
+        
+        {% if docs %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+            {% for doc in docs %}
+                {% set card_class = 'card-generic' %}
+                {% set title = doc.doc_type %}
+                {% if 'Aadhar' in doc.doc_type %}
+                    {% set card_class = 'card-aadhar' %}
+                    {% set title = 'Government of India' %}
+                {% elif 'PAN' in doc.doc_type %}
+                    {% set card_class = 'card-pan' %}
+                    {% set title = 'Income Tax Department' %}
+                {% endif %}
+                
+                <div class="physical-card {{ card_class }}">
+                    <div class="card-header-emblem">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Ashoka_Chakra.svg" alt="Emblem" style="height: 24px;">
+                        <h4>{{ title }}</h4>
+                    </div>
+                    <div class="card-body-text">
+                        <div><strong>NAME:</strong> {{ current_user.name or 'CITIZEN' }}</div>
+                        <div><strong>DOB/AGE:</strong> {{ current_user.age or 'XX/XX/XXXX' }}</div>
+                    </div>
+                    <div class="card-footer-number" style="display: flex; justify-content: space-between; align-items: center; padding: 12px;">
+                        <div style="font-size: 0.85rem; text-align: left; line-height: 1.3;">
+                            <span style="font-weight: 900;">{{ doc.doc_type | upper }}</span><br>
+                            <span style="font-size: 0.70rem; color: var(--text-secondary); font-weight: 700;">Uploaded: {{ doc.uploaded_at.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn btn-outline open-assessor-btn" title="Assess Intelligence Payload" data-doc-url="{{ url_for('static', filename='uploads/documents/' + doc.filename) }}" data-doc-type="{{ doc.doc_type }}" data-extracted="{{ doc.extracted_text | escape }}" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 800; background: #fff; box-shadow: 0 4px 12px rgba(16,185,129,0.15); border-color: #10b981; color: #10b981;">
+                                <i class="fa-solid fa-microchip"></i> Assess
+                            </button>
+                            <form action="{{ url_for('profile.delete_doc', doc_id=doc.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete this document? The AI will no longer be able to use this data.');">
+                                <button type="submit" class="btn btn-danger" title="Permanently Delete Document" style="padding: 6px 14px; font-size: 0.85rem; background: #ef4444; border: 1px solid #dc2626; color: white; border-radius: 6px; box-shadow: 0 2px 8px rgba(239,68,68,0.3); cursor: pointer; transition: background 0.2s;">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 50px 20px; background: #fff; border-radius: 12px; border: 1px dashed var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <i class="fa-solid fa-folder-open" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+                <h3 style="margin: 0 0 10px 0; color: var(--text-primary); font-size: 1.3rem;">Vault is Empty</h3>
+                <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 20px;">Upload Official Documents to empower your Identity.</p>
+                <a href="{{ url_for('profile.profile') }}" class="btn btn-primary" style="padding: 12px 25px; font-weight: 800;"><i class="fa-solid fa-plus"></i> Upload Official Document</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- RIGHT PANEL: Activity Log -->
+    <div>
+        <div class="card" style="padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border-color: rgba(0,65,121,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 style="font-size: 1.2rem; color: var(--text-primary); font-weight: 900; margin: 0; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Automation Payload Log
+                </h3>
+            </div>
+            
+            {% if history %}
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Date</th>
+                            <th>Action Target</th>
+                            <th style="text-align: center;">Status</th>
+                        </tr>
+                        {% for h in history %}
+                        <tr>
+                            <td style="font-weight: 800; color: var(--text-secondary); white-space: nowrap;">{{ h.timestamp.strftime('%b %d') }}</td>
+                            <td class="url-cell">
+                                <a href="{{ h.target_url }}" target="_blank" style="text-decoration: none; color: inherit;" title="{{ h.target_url }}">
+                                    {{ h.target_url[:28] }}{{ '...' if h.target_url|length > 28 else '' }}
+                                </a>
+                            </td>
+                            <td style="text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                                <span class="badge badge-success" style="font-size: 0.65rem; padding: 4px 10px; box-shadow: 0 2px 5px rgba(16,185,129,0.3);"><i class="fa-solid fa-check"></i> SECURE</span>
+                                <form action="{{ url_for('core.delete_history', history_id=h.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete this automation log entry?');">
+                                    <button type="submit" title="Remove Log" style="background: none; border: none; font-size: 0.9rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#ef4444';" onmouseout="this.style.color='#cbd5e1';">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.8rem; color: var(--text-secondary); text-align: center; font-weight: 700;">
+                    <i class="fa-solid fa-shield-halved"></i> Extension payloads are E2E encrypted.
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);">
+                    <i class="fa-solid fa-robot" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+                    <h4 style="margin: 0 0 8px 0; color: var(--text-primary);">No Form Interventions</h4>
+                    <p style="margin: 0; color: var(--text-secondary); font-size: 0.95rem; font-weight: 600; line-height: 1.5;">Use the Chrome Extension on any external website to instantly inject this identity.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+</div>
+
+<!-- NeoVault Intelligence Assessor Modal -->
+<div id="assessor-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease;">
+    <div class="modal-content" style="background: var(--card-bg); width: 95%; max-width: 1300px; height: 90vh; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 25px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.95); transition: transform 0.3s ease;">
+        
+        <!-- Modal Header -->
+        <div style="padding: 20px 30px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.4rem; font-weight: 900; color: var(--text-primary);"><i class="fa-solid fa-satellite-dish fa-beat" style="color: #10b981; margin-right: 10px;"></i> <span id="assessor-title">Document Intelligence Node</span></h3>
+                <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: var(--text-secondary); font-weight: 600;">NeoVault Zero-Trust Local Assessment Environment</p>
+            </div>
+            <button id="close-assessor" class="btn btn-outline" style="border: none; background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 1.2rem; padding: 10px 15px; border-radius: 8px;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <!-- Modal Body Split -->
+        <div style="display: flex; flex: 1; overflow: hidden; flex-wrap: wrap;">
+            
+            <!-- Left Pane: Physical File View -->
+            <div style="flex: 1; min-width: 300px; border-right: 1px solid var(--border-color); background: #e2e8f0; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 15px; left: 15px; background: rgba(15,23,42,0.8); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 800; letter-spacing: 1px; z-index: 10;"><i class="fa-solid fa-file-pdf"></i> PHYSICAL PAYLOAD</div>
+                <iframe id="assessor-iframe" src="" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+            </div>
+            
+            <!-- Right Pane: Extracted OCR Matrix -->
+            <div style="flex: 1; min-width: 300px; background: #0f172a; color: #10b981; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; position: relative;">
+                <div style="padding: 15px 25px; border-bottom: 1px solid rgba(16,185,129,0.2); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3);">
+                    <div style="font-size: 0.85rem; font-weight: 800; letter-spacing: 2px;"><i class="fa-solid fa-microchip"></i> EXTRACTED MACHINE INTELLIGENCE</div>
+                    <div style="font-size: 0.75rem; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3);">CONFIDENCE: HIGH</div>
+                </div>
+                <!-- Scanning Overlay Animation -->
+                <div id="assessor-scanline" style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #10b981; box-shadow: 0 0 15px #10b981, 0 0 30px #10b981; animation: deepScan 3s linear infinite; pointer-events: none;"></div>
+                
+                <div style="flex: 1; padding: 25px; overflow-y: auto;">
+                    <pre id="assessor-text" style="margin: 0; white-space: pre-wrap; font-size: 0.95rem; line-height: 1.6; text-shadow: 0 0 5px rgba(16,185,129,0.4);"></pre>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes deepScan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('assessor-modal');
+        const modalContent = modal.querySelector('.modal-content');
+        const iframe = document.getElementById('assessor-iframe');
+        const title = document.getElementById('assessor-title');
+        const textPre = document.getElementById('assessor-text');
+        
+        let typeWriterInterval = null;
+
+        document.querySelectorAll('.open-assessor-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = btn.getAttribute('data-doc-url');
+                const type = btn.getAttribute('data-doc-type');
+                const rawText = btn.getAttribute('data-extracted') || 'No machine readable text detected in this payload.';
+                
+                title.innerHTML = `${type} <span style="font-weight: 400; color: #64748b;">| Local Node Analysis</span>`;
+                iframe.src = url;
+                
+                textPre.innerHTML = '';
+                
+                modal.style.display = 'flex';
+                void modal.offsetWidth; // Trigger reflow
+                modal.style.opacity = '1';
+                modalContent.style.transform = 'scale(1)';
+                
+                let i = 0;
+                clearInterval(typeWriterInterval);
+                typeWriterInterval = setInterval(() => {
+                    if (i < rawText.length) {
+                        textPre.innerHTML += rawText.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(typeWriterInterval);
+                    }
+                }, 10);
+            });
+        });
+        
+        document.getElementById('close-assessor').addEventListener('click', () => {
+            clearInterval(typeWriterInterval);
+            modal.style.opacity = '0';
+            modalContent.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                iframe.src = '';
+                textPre.innerHTML = '';
+            }, 300);
+        });
+    });
+</script>
+
+{% endblock %}

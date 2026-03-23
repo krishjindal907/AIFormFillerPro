@@ -1,0 +1,10 @@
+John Testman
+Senior Software Engineer
+Phone: (555) 987-6543
+Email: johntestman@example.com
+
+SKILLS
+Python, JavaScript, React, SQL, Docker, HTML, CSS.
+
+EXPERIENCE
+Spent 5 years building scalable web applications.

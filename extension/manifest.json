@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "AI Form Filler Pro",
+  "version": "1.0",
+  "description": "Magically fill any form on the web using your Universal Knowledge Vault & Gemini AI.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5000/*",
+    "http://localhost:5000/*"
+  ]
+}

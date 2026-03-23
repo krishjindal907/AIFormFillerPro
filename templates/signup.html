@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - NeoVault Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="margin: 0; padding: 0; min-height: 100vh; background: #000; display: flex; align-items: center; justify-content: center; font-family: 'Open Sans', sans-serif; position: relative; overflow: hidden; color: #fff;">
+    <!-- Deep Neon Atmospheric Glow -->
+    <div style="position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 60%); top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"></div>
+    
+    <div style="position: absolute; inset: 0; background-size: 50px 50px; background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); pointer-events: none; animation: panGrid 60s linear infinite reverse;"></div>
+
+    <style>
+        @keyframes panGrid { 0% { background-position: 0 0; } 100% { background-position: 1000px 1000px; } }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .dev-input { width: 100%; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 0.95rem; box-sizing: border-box; transition: all 0.2s; }
+        .dev-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .dev-label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #94a3b8; }
+        .dev-btn { width: 100%; padding: 12px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .dev-btn:hover { background: #cbd5e1; transform: translateY(-1px); }
+        .social-btn { flex: 1; padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .social-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+    </style>
+
+    <div style="z-index: 10; width: 100%; max-width: 400px; padding: 40px; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); animation: fadeUp 0.6s ease-out;">
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+             <i class="fa-solid fa-layer-group" style="font-size: 2.5rem; background: linear-gradient(135deg, #60a5fa, #c084fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px;"></i>
+             <h2 style="margin: 0 0 8px 0; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Initialize Matrix</h2>
+             <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Forge your secure Master Intelligence Core.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; font-weight: 600;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <button type="button" class="social-btn"><i class="fa-brands fa-github" style="font-size: 1.1rem;"></i> GitHub</button>
+            <button type="button" class="social-btn"><i class="fa-brands fa-google" style="font-size: 1.1rem;"></i> Google</button>
+        </div>
+
+        <div style="display: flex; align-items: center; margin: 20px 0; color: #475569;">
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+            <span style="padding: 0 15px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">or register an email</span>
+            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.signup') }}" id="register-form">
+            <div style="margin-bottom: 15px;">
+                <label class="dev-label">Full Name</label>
+                <input type="text" name="name" class="dev-input" required placeholder="John Doe">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label class="dev-label">Email Address</label>
+                <input type="email" name="email" class="dev-input" required placeholder="developer@neovault.io">
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label class="dev-label">Create Security PIN</label>
+                <input type="password" name="password" class="dev-input" required placeholder="••••••••">
+            </div>
+            
+            <button type="submit" class="dev-btn" id="signup-btn">
+                Create Account <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
+            </button>
+        </form>
+        
+        <div style="margin-top: 25px; text-align: center;">
+            <p style="font-size: 0.9rem; color: #94a3b8; margin: 0;">
+                Already connected? 
+                <a href="{{ url_for('auth.login') }}" style="color: #fff; font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 2px;">Sign in securely</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById("signup-btn").addEventListener("click", function(e) {
+            if(document.getElementById("register-form").checkValidity()) {
+                this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Securing Vault...';
+            }
+        });
+    </script>
+</body>
+</html>

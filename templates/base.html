@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- PWA Installation Requirements -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NeoVault">
+    
+    <title>NeoVault Dashboard Core</title>
+    <!-- Fonts & CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- DigiLocker Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand" style="justify-content: center; padding: 25px 0;">
+                <i class="fa-solid fa-layer-group" style="font-size: 2rem; background: linear-gradient(135deg, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                <span style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; color: var(--text-primary);">Neo<span style="color: var(--primary);">Vault</span></span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('core.index') }}" class="nav-link {{ 'active' if request.endpoint == 'core.index' else '' }}">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+                <a href="{{ url_for('profile.my_profile') }}" class="nav-link {{ 'active' if request.endpoint == 'profile.my_profile' else '' }}">
+                    <i class="fa-solid fa-user-circle"></i> My Profile
+                </a>
+                <a href="{{ url_for('profile.profile') }}" class="nav-link {{ 'active' if request.endpoint == 'profile.profile' else '' }}">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Document
+                </a>
+                <a href="{{ url_for('analyze.analyze_view') }}" class="nav-link {{ 'active' if request.endpoint == 'analyze.analyze_view' else '' }}">
+                    <i class="fa-solid fa-wand-sparkles"></i> AI Form Analyzer
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="nav-link" style="color: var(--danger); margin-top: 20px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                <a href="{{ url_for('auth.signup') }}" class="nav-link"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+                {% endif %}
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header" style="background: var(--card-bg); color: var(--text-primary); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button id="theme-toggle" class="btn btn-outline" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); color: var(--text-secondary); background: var(--bg-color);">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <span style="font-weight: 700; color: var(--text-secondary); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px;"><i class="fa-solid fa-shield-halved" style="color: #10b981; margin-right: 8px;"></i> E-KYC Gateway</span>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <div class="user-profile-header">
+                    <span style="color: var(--text-primary);">Welcome, {{ current_user.name or 'Citizen' }}</span>
+                    <div class="user-avatar" style="overflow: hidden; border: 2px solid var(--primary); background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                        {% if current_user.profile_pic %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' + current_user.profile_pic) }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ current_user.name or 'User' }}&background=0D8ABC&color=fff';" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ current_user.name or 'User' }}&background=0D8ABC&color=fff" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </header>
+
+            <div class="content-wrapper">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages" style="margin-bottom: 20px;">
+                            {% for category, message in messages %}
+                                <div style="background:var(--success); color:white; padding:10px; border-radius:4px; margin-bottom:10px;">
+                                    <i class="fa-solid fa-circle-check"></i> {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}")
+                    .then(reg => console.log('NeoVault PWA Secured.', reg.scope))
+                    .catch(err => console.log('PWA Error:', err));
+            });
+        }
+    </script>
+    <script>
+        const getPreferredTheme = () => localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const setTheme = theme => { document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); 
+            const icon = document.querySelector('#theme-toggle i');
+            if(icon) { icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon'; }
+        }
+        setTheme(getPreferredTheme());
+        document.getElementById('theme-toggle')?.addEventListener('click', () => { setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); });
+    </script>
+</body>
+</html>
