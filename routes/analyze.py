@@ -72,11 +72,12 @@ def fetch_form():
     soup = BeautifulSoup(html, 'html.parser')
     forms = soup.find_all('form')
     
-    if not forms:
-        return jsonify({"error": "No forms found in the document."}), 400
+    # Lenient Mode: If no <form> tag is found, treat the whole body as a form
+    if forms:
+        target_form = forms[0]
+    else:
+        target_form = soup.body if soup.body else soup
         
-    target_form = forms[0]
-    
     fields = []
     
     for el in target_form.find_all(['input', 'select', 'textarea']):
