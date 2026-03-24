@@ -36,12 +36,14 @@ def create_app():
     from routes.profile import profile_bp
     from routes.analyze import analyze_bp
     from routes.autofill import autofill_bp
+    from routes.parsing import parsing_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(core_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(analyze_bp)
     app.register_blueprint(autofill_bp)
+    app.register_blueprint(parsing_bp)
 
     with app.app_context():
         # Create database tables if they do not exist

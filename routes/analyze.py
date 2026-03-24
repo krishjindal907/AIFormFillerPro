@@ -2,7 +2,7 @@ import re
 import json
 import requests
 from bs4 import BeautifulSoup
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required, current_user
 from models import db, FormAnalysis
 
@@ -129,6 +129,10 @@ def fetch_form():
     gemini_key = os.environ.get("GEMINI_API_KEY")
     ai_mapping = {}
     vault_context = getattr(current_user, 'preferences', '') or f"Name: {getattr(current_user, 'name', '')}, Profession: {getattr(current_user, 'profession', '')}, Skills: {getattr(current_user, 'skills', '')}"
+    
+    parsed_memory = session.get('active_parsed_memory')
+    if parsed_memory:
+        vault_context += f"\n\n--- HIGH PRIORITY TEMPORARY PARSED DATA ---\nThe following data was just parsed from a Resume/Document by the user and should OVERRIDE permanent vault data:\n{json.dumps(parsed_memory, indent=2)}"
 
     if gemini_key and fields and vault_context.strip():
         try:
@@ -242,6 +246,10 @@ def extension_analyze():
     gemini_key = os.environ.get("GEMINI_API_KEY")
     ai_mapping = {}
     vault_context = getattr(user, 'preferences', '') or f"Name: {getattr(user, 'name', '')}, Profession: {getattr(user, 'profession', '')}, Skills: {getattr(user, 'skills', '')}"
+
+    parsed_memory = session.get('active_parsed_memory')
+    if parsed_memory:
+        vault_context += f"\n\n--- HIGH PRIORITY TEMPORARY PARSED DATA ---\nThe following data was just parsed from a Resume/Document by the user and should OVERRIDE permanent vault data:\n{json.dumps(parsed_memory, indent=2)}"
 
     if gemini_key and fields and vault_context.strip():
         try:

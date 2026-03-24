@@ -98,6 +98,7 @@
         <p style="color: var(--text-secondary); font-weight: 700; font-size: 1.05rem; margin: 0;">Comprehensive AI-Ready Verification Dashboard</p>
     </div>
     <div style="display: flex; gap: 15px;">
+        <button onclick="document.getElementById('parser-modal').style.display='flex'" class="btn btn-outline" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; border-color: #6366f1; font-weight: 800; padding: 12px 24px; font-size: 1rem;"><i class="fa-solid fa-microchip"></i> Smart Parser</button>
         <button onclick="document.getElementById('edit-modal').style.display='flex'" class="btn btn-outline" style="background: white; border-color: var(--border-color); font-weight: 800; padding: 12px 24px; font-size: 1rem;"><i class="fa-solid fa-pen-nib"></i> Map Identity</button>
         <button onclick="window.print()" class="btn btn-primary" style="font-weight: 800; padding: 12px 24px; font-size: 1rem; box-shadow: 0 4px 15px rgba(0,65,121,0.2);"><i class="fa-solid fa-print"></i> Print Dossier</button>
     </div>
@@ -317,4 +318,191 @@
         </form>
     </div>
 </div>
+
+<!-- Smart Parser Modal -->
+<div id="parser-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 15, 30, 0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(12px);">
+    <div class="card animate-up" style="width: 100%; max-width: 600px; padding: 45px; position: relative; border-radius: 24px; box-shadow: 0 25px 80px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;">
+        <button onclick="document.getElementById('parser-modal').style.display='none'" style="position: absolute; right: 25px; top: 25px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-secondary); transition: color 0.2s;"><i class="fa-solid fa-xmark"></i></button>
+        <h3 style="margin-top: 0; color: #6366f1; border-bottom: 2px solid rgba(99, 102, 241, 0.2); padding-bottom: 20px; margin-bottom: 30px; font-weight: 900; font-size: 1.6rem; letter-spacing: -0.5px;"><i class="fa-solid fa-brain"></i> Neural Parsing Engine</h3>
+        
+        <!-- Input Stage -->
+        <div id="parse-input-stage">
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 25px;">Instantly extract structured variables from raw content for temporary autofill deployment. <strong style="color: #ef4444;">No data is permanently saved to the vault.</strong></p>
+            
+            <div class="form-group">
+                <label style="font-weight: 800; color: var(--text-secondary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Input Source Type</label>
+                <select id="parse-type" class="form-control" onchange="toggleParseInput()" style="background: #f8fafc;">
+                    <option value="text">Raw Text (Copy/Paste Resume)</option>
+                    <option value="url">URL Extractor</option>
+                    <option value="pdf">PDF Binary Upload</option>
+                    <option value="image">Image Scan (Visual OCR Engine)</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="wrap-text">
+                <textarea id="parse-text-val" class="form-control" rows="6" placeholder="Paste unstructured plaintext here..."></textarea>
+            </div>
+            <div class="form-group" id="wrap-url" style="display:none;">
+                <input type="url" id="parse-url-val" class="form-control" placeholder="https://linkedin.com/in/...">
+            </div>
+            <div class="form-group" id="wrap-pdf" style="display:none;">
+                <div style="border: 2px dashed #6366f1; padding: 20px; border-radius: 16px; background: rgba(99, 102, 241, 0.05); text-align: center;">
+                    <input type="file" id="parse-pdf-val" accept=".pdf" style="font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%;">
+                </div>
+            </div>
+            <div class="form-group" id="wrap-image" style="display:none;">
+                <div style="border: 2px dashed #6366f1; padding: 20px; border-radius: 16px; background: rgba(99, 102, 241, 0.05); text-align: center;">
+                    <p style="margin: 0 0 10px 0; color: #6366f1; font-weight: 800; font-size: 0.85rem;"><i class="fa-solid fa-camera"></i> Vision Engine Initialized</p>
+                    <input type="file" id="parse-img-val" accept=".png, .jpg, .jpeg" style="font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%;">
+                </div>
+            </div>
+            
+            <button onclick="executeParseSequence()" id="btn-parse-initiate" class="btn btn-primary" style="background: #6366f1; border: none; width: 100%; margin-top: 15px; padding: 18px; font-size: 1.15rem; font-weight: 900; border-radius: 12px;"><i class="fa-solid fa-bolt"></i> Extract Core Entities</button>
+        </div>
+        
+        <!-- Preview / Edit Stage -->
+        <div id="parse-preview-stage" style="display: none;">
+            <div style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 12px 18px; border-radius: 10px; font-size: 0.9rem; font-weight: 800; margin-bottom: 25px;">
+                <i class="fa-solid fa-circle-check"></i> Extraction Successful. Review variables below.
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Entity Name</label>
+                    <input type="text" id="prev-name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Primary Email</label>
+                    <input type="text" id="prev-email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Phone Vector</label>
+                    <input type="text" id="prev-phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Locational Syntax</label>
+                    <input type="text" id="prev-address" class="form-control">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Entity Origin (DOB)</label>
+                    <input type="text" id="prev-dob" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Education Matrix (JSON Array)</label>
+                <textarea id="prev-education" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.8rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase;">Experience Matrix (JSON Array)</label>
+                <textarea id="prev-experience" class="form-control" rows="3"></textarea>
+            </div>
+            
+            <button onclick="commitParsedMemory()" class="btn btn-primary" style="width: 100%; background: #10b981; border: none; margin-top: 15px; padding: 18px; font-size: 1.15rem; font-weight: 900; border-radius: 12px; box-shadow: 0 8px 30px rgba(16,185,129,0.3);"><i class="fa-solid fa-satellite-dish"></i> Commit to Temporal Memory & Autofill</button>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    function toggleParseInput() {
+        const type = document.getElementById('parse-type').value;
+        document.getElementById('wrap-text').style.display = type === 'text' ? 'block' : 'none';
+        document.getElementById('wrap-url').style.display = type === 'url' ? 'block' : 'none';
+        document.getElementById('wrap-pdf').style.display = type === 'pdf' ? 'block' : 'none';
+        document.getElementById('wrap-image').style.display = type === 'image' ? 'block' : 'none';
+    }
+    
+    async function executeParseSequence() {
+        const type = document.getElementById('parse-type').value;
+        const btn = document.getElementById('btn-parse-initiate');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Neural Engine Processing...';
+        btn.disabled = true;
+        
+        let endpoint = '';
+        let payload = null;
+        let isFormData = false;
+        
+        if (type === 'text') {
+            endpoint = '/parse-text';
+            payload = JSON.stringify({text: document.getElementById('parse-text-val').value});
+        } else if (type === 'url') {
+            endpoint = '/parse-url';
+            payload = JSON.stringify({url: document.getElementById('parse-url-val').value});
+        } else if (type === 'pdf') {
+            endpoint = '/parse-pdf';
+            const file = document.getElementById('parse-pdf-val').files[0];
+            if (!file) { alert('Attach physical file metadata.'); btn.innerHTML = 'Extract Core Entities'; btn.disabled = false; return; }
+            payload = new FormData();
+            payload.append('file', file);
+            isFormData = true;
+        } else if (type === 'image') {
+            endpoint = '/parse-image';
+            const file = document.getElementById('parse-img-val').files[0];
+            if (!file) { alert('Attach physical image array for OCR.'); btn.innerHTML = 'Extract Core Entities'; btn.disabled = false; return; }
+            payload = new FormData();
+            payload.append('file', file);
+            isFormData = true;
+        }
+        
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: isFormData ? {} : {'Content-Type': 'application/json'},
+                body: payload
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                alert("Execution Fault: " + data.error);
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Extract Core Entities';
+                btn.disabled = false;
+                return;
+            }
+            
+            // Populate Preview Array
+            document.getElementById('prev-name').value = data.name || '';
+            document.getElementById('prev-email').value = data.email || '';
+            document.getElementById('prev-phone').value = data.phone || '';
+            document.getElementById('prev-address').value = data.address || '';
+            document.getElementById('prev-dob').value = data.date_of_birth || '';
+            document.getElementById('prev-education').value = JSON.stringify(data.education || []);
+            document.getElementById('prev-experience').value = JSON.stringify(data.experience || []);
+            
+            // Flip UI Modules
+            document.getElementById('parse-input-stage').style.display = 'none';
+            document.getElementById('parse-preview-stage').style.display = 'block';
+            
+        } catch (err) {
+            alert('Fatal Backend Connectivity Error.');
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Extract Core Entities';
+            btn.disabled = false;
+        }
+    }
+    
+    async function commitParsedMemory() {
+        // Collect manually verified data from user
+        const finalData = {
+            name: document.getElementById('prev-name').value,
+            email: document.getElementById('prev-email').value,
+            phone: document.getElementById('prev-phone').value,
+            address: document.getElementById('prev-address').value,
+            date_of_birth: document.getElementById('prev-dob').value,
+            education: document.getElementById('prev-education').value,
+            experience: document.getElementById('prev-experience').value
+        };
+        
+        try {
+            await fetch('/update-memory', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(finalData)
+            });
+            // Teleport to Universal Autofill Module
+            window.location.href = "/analyze";
+        } catch (err) {
+            alert('Failed to transmit memory frame.');
+        }
+    }
+</script>
+
 {% endblock %}
