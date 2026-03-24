@@ -14,35 +14,80 @@
     <h3 style="margin-top: 0; color: var(--text-primary); font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px;"><i class="fa-solid fa-file-shield" style="color: var(--primary);"></i> Encrypted Document Upload Payload</h3>
     <p style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.6; font-weight: 500; font-size: 1.05rem;">Select the intelligence vector category. Your NeoVault architecture utilizes military-grade OCR scanning to extract and deploy demographic data locally, completely isolated from external tracking servers.</p>
     
-    <form id="doc-upload-form">
-        <div class="form-group">
-            <label>Official Document Category</label>
-            <select name="doc_type" class="form-control" required style="margin-bottom: 20px; cursor: pointer;">
-                <option value="Aadhar Card">Aadhar Card</option>
-                <option value="PAN Card">PAN Card</option>
-                <option value="Driving License">Driving License</option>
-                <option value="10th Marksheet">10th / 12th Marksheet</option>
-                <option value="Resume / CV">Resume / CV</option>
-                <option value="Generic Information Document">Other Generic Output</option>
-            </select>
+    <div id="upload-stage">
+        <form id="doc-upload-form">
+            <div class="form-group">
+                <label>Official Document Category</label>
+                <select id="doc_type_select" class="form-control" required style="margin-bottom: 20px; cursor: pointer;">
+                    <option value="Aadhar Card">Aadhar Card</option>
+                    <option value="PAN Card">PAN Card</option>
+                    <option value="Driving License">Driving License</option>
+                    <option value="10th Marksheet">10th / 12th Marksheet</option>
+                    <option value="Resume / CV">Resume / CV</option>
+                    <option value="Generic Information Document">Other Generic Output</option>
+                </select>
+            </div>
+            
+            <div class="dropzone" id="dropzoneWrapper" style="border: 2px dashed rgba(59, 130, 246, 0.5); border-radius: 16px; padding: 50px 20px; background: rgba(59, 130, 246, 0.03); transition: all 0.3s; position: relative; overflow: hidden; margin-top: 25px;">
+                <div style="position: absolute; top:0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: scanline 3s linear infinite; opacity: 0.6;"></div>
+                <i class="fa-solid fa-file-arrow-up" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.3));"></i>
+                <h4 style="margin: 0 0 10px 0; color: var(--text-primary); font-weight: 800; font-size: 1.25rem;">Initialize File Transfer Protocol</h4>
+                <p style="margin: 0; color: var(--text-secondary); font-weight: 600;">Drag & Drop your secure PDF or Image payload here</p>
+                <input type="file" id="fileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" style="opacity: 0; position: absolute; left: -9999px;">
+                <style>
+                    @keyframes scanline { 0% { transform: translateY(-50px); } 100% { transform: translateY(200px); } }
+                </style>
+            </div>
+            <div id="file-name-display" style="margin-top: 15px; font-weight: 600; color: var(--primary); text-align: center;"></div>
+            
+            <button type="submit" class="btn btn-primary" id="upload-btn" style="width: 100%; margin-top: 30px; padding: 18px; font-size: 1.2rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; box-shadow: 0 8px 25px rgba(0,65,121,0.3);">
+                <i class="fa-solid fa-bolt"></i> Ingest & Scan Intelligence In-Memory
+            </button>
+        </form>
+    </div>
+
+    <!-- STAGE 2: REVIEW & EDIT PORTAL -->
+    <div id="review-stage" style="display: none;">
+        <h4 style="color: #10b981; font-weight: 900; margin-bottom: 20px;"><i class="fa-solid fa-magnifying-glass-chart"></i> Neural Extraction Results</h4>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 25px;">The AI has extracted the following intelligence from your payload. Please verify or edit the data before committing to the secure vault.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Legal Name</label>
+                <input type="text" id="rev-name" class="form-control" placeholder="Missing Field">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Email Vector</label>
+                <input type="email" id="rev-email" class="form-control" placeholder="Missing Field">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Contact Number</label>
+                <input type="text" id="rev-phone" class="form-control" placeholder="Missing Field">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Residential Address</label>
+                <input type="text" id="rev-address" class="form-control" placeholder="Missing Field">
+            </div>
         </div>
         
-        <div class="dropzone" id="dropzoneWrapper" style="border: 2px dashed rgba(59, 130, 246, 0.5); border-radius: 16px; padding: 50px 20px; background: rgba(59, 130, 246, 0.03); transition: all 0.3s; position: relative; overflow: hidden; margin-top: 25px;">
-            <div style="position: absolute; top:0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: scanline 3s linear infinite; opacity: 0.6;"></div>
-            <i class="fa-solid fa-file-arrow-up" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.3));"></i>
-            <h4 style="margin: 0 0 10px 0; color: var(--text-primary); font-weight: 800; font-size: 1.25rem;">Initialize File Transfer Protocol</h4>
-            <p style="margin: 0; color: var(--text-secondary); font-weight: 600;">Drag & Drop your secure PDF or Image payload here</p>
-            <input type="file" id="fileInput" accept=".pdf,.txt,.png,.jpg,.jpeg" style="opacity: 0; position: absolute; left: -9999px;">
-            <style>
-                @keyframes scanline { 0% { transform: translateY(-50px); } 100% { transform: translateY(200px); } }
-            </style>
+        <div class="form-group" style="margin-top: 20px;">
+            <label style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Education & Experience Log</label>
+            <textarea id="rev-metadata" class="form-control" rows="4" style="font-family: monospace; font-size: 0.85rem;"></textarea>
         </div>
-        <div id="file-name-display" style="margin-top: 15px; font-weight: 600; color: var(--primary); text-align: center;"></div>
-        
-        <button type="submit" class="btn btn-primary" id="upload-btn" style="width: 100%; margin-top: 30px; padding: 18px; font-size: 1.2rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; box-shadow: 0 8px 25px rgba(0,65,121,0.3);">
-            <i class="fa-solid fa-lock"></i> Store payload in Secure Vault & Extract OSIND
-        </button>
-    </form>
+
+        <div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 15px; margin-top: 25px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <input type="checkbox" id="save-file-flag" style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="save-file-flag" style="margin: 0; font-weight: 700; color: var(--text-primary); cursor: pointer;">Store physical binary file in Vault?</label>
+            </div>
+            <i class="fa-solid fa-file-shield" style="color: var(--primary); font-size: 1.2rem;"></i>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 35px;">
+            <button onclick="cancelIngestion()" class="btn btn-outline" style="padding: 15px; font-weight: 800; color: #ef4444; border-color: #ef4444;"><i class="fa-solid fa-trash-can"></i> Discard & Cancel</button>
+            <button onclick="finalizeIngestion()" id="finalize-btn" class="btn btn-primary" style="padding: 15px; font-weight: 900; background: #10b981; border: none; box-shadow: 0 4px 15px rgba(16,185,129,0.3);"><i class="fa-solid fa-cloud-arrow-up"></i> Confirm & Save to Vault</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -78,31 +123,108 @@
     
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if(!fileInput.files.length) return alert("Please select a document to secure.");
+        if(!fileInput.files.length) return alert("Please select a document for memory ingestion.");
         
         const btn = document.getElementById('upload-btn');
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Extracting & Securing...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Neural Parsing Engine Scanning...';
         btn.disabled = true;
         
         const fd = new FormData();
-        fd.append('doc_type', form.doc_type.value);
+        fd.append('doc_type', document.getElementById('doc_type_select').value);
         fd.append('document', fileInput.files[0]);
         
         try {
             const res = await fetch('/api/upload_doc', { method: 'POST', body: fd });
-            const data = await res.json();
-            if(data.status === 'success') {
-                alert("Document successfully secured in your DigiLocker Drive!\nThe AI has fully extracted its text into your Universal Knowledge Vault.");
-                window.location.href = '/';
+            const result = await res.json();
+            if(result.status === 'success') {
+                const data = result.data;
+                // Transition to Review Stage
+                document.getElementById('upload-stage').style.display = 'none';
+                document.getElementById('review-stage').style.display = 'block';
+                
+                // Populate Review Fields
+                document.getElementById('rev-name').value = data.name || '';
+                document.getElementById('rev-email').value = data.email || '';
+                document.getElementById('rev-phone').value = data.phone || '';
+                document.getElementById('rev-address').value = data.address || '';
+                
+                const meta = {
+                    education: data.education || [],
+                    experience: data.experience || []
+                };
+                document.getElementById('rev-metadata').value = JSON.stringify(meta, null, 2);
+                
+                // Highlight missing fields
+                ['rev-name', 'rev-email', 'rev-phone', 'rev-address'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.style.border = el.value ? '1px solid var(--border-color)' : '2px solid #fbbf24';
+                });
+
             } else {
-                alert("Vault Extraction Error: " + data.message);
+                alert("Vault Extraction Error: " + result.message);
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Ingest & Scan Intelligence';
+                btn.disabled = false;
             }
         } catch(err) {
-            alert("Network Error uploading document.");
+            alert("Network Error during memory ingestion.");
+            btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Ingest & Scan Intelligence';
+            btn.disabled = false;
         }
-        
-        btn.innerHTML = '<i class="fa-solid fa-lock"></i> Store in Secure Vault & Extract';
-        btn.disabled = false;
     });
+
+    async function finalizeIngestion() {
+        // Data Validation
+        const email = document.getElementById('rev-email').value;
+        const phone = document.getElementById('rev-phone').value;
+        
+        if (email && !email.includes('@')) return alert("Invalid Email Syntax.");
+        if (phone && phone.length < 10) return alert("Invalid Phone Coordinate.");
+
+        const btn = document.getElementById('finalize-btn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Committing to Digital Vault...';
+        btn.disabled = true;
+
+        const verified = {
+            name: document.getElementById('rev-name').value,
+            email: email,
+            phone: phone,
+            address: document.getElementById('rev-address').value
+        };
+
+        const payload = {
+            doc_type: document.getElementById('doc_type_select').value,
+            save_file: document.getElementById('save-file-flag').checked,
+            verified_data: verified
+        };
+
+        try {
+            const res = await fetch('/api/confirm_save_doc', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.status === 'success') {
+                alert("SUCCESS: Intelligence verified and archived.");
+                window.location.href = '/';
+            } else {
+                alert("Persistence Error: " + data.message);
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Confirm & Save to Vault';
+                btn.disabled = false;
+            }
+        } catch(err) {
+            alert("Fatal Communication Error.");
+            btn.disabled = false;
+        }
+    }
+
+    async function cancelIngestion() {
+        if(confirm("Discard all extracted intelligence and purge memory?")) {
+            try {
+                await fetch('/api/cancel_ingestion', { method: 'POST' });
+            } catch(e) {}
+            window.location.reload();
+        }
+    }
 </script>
 {% endblock %}

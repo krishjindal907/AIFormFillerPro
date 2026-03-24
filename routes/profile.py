@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import login_required, current_user
 from models import db
 
@@ -78,6 +78,10 @@ def export_profile():
 @profile_bp.route('/api/upload_doc', methods=['POST'])
 @login_required
 def upload_doc():
+    """ 
+    Scan-Before-Store Stage 1: In-Memory Ingestion 
+    Performs parsing FIRST without touching the disk.
+    """
     if 'document' not in request.files:
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
         
@@ -87,48 +91,141 @@ def upload_doc():
     if file.filename == '':
         return jsonify({"status": "error", "message": "No file selected"}), 400
         
-    text = ""
     try:
-        import os
+        from parsing_engine import parse_pdf, parse_image, parse_text
         from werkzeug.utils import secure_filename
+        import os
         
-        user_folder = f"User_{current_user.id}_Vault"
-        secure_name = secure_filename(file.filename)
-        relative_path = f"{user_folder}/{secure_name}"
+        # 0. Secure Temp Storage
+        temp_dir = os.path.join('static', 'uploads', 'temp_hold')
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_filename = secure_filename(f"temp_{current_user.id}_{file.filename}")
+        temp_path = os.path.join(temp_dir, temp_filename)
+        file.save(temp_path)
         
-        filepath = os.path.join('static', 'uploads', 'documents', user_folder, secure_name)
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        # 1. Parsing FIRST (From temp file)
+        result = None
+        text_content = ""
         
         if file.filename.lower().endswith('.pdf'):
-            import PyPDF2
-            pdf_reader = PyPDF2.PdfReader(file)
-            for page in pdf_reader.pages:
-                extracted = page.extract_text()
-                if extracted:
-                    text += extracted + " "
+            with open(temp_path, 'rb') as f:
+                result = parse_pdf(f)
+                f.seek(0)
+                import PyPDF2
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    text_content += (page.extract_text() or "") + "\n"
+        elif file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+            with open(temp_path, 'rb') as f:
+                result = parse_image(f)
         else:
-            text = file.read().decode('utf-8', errors='ignore')
+            with open(temp_path, 'r', encoding='utf-8', errors='ignore') as f:
+                text_content = f.read()
+                result = parse_text(text_content)
             
-        # Secure the physical file into the local OS Document Drive
-        file.seek(0)
-        file.save(filepath)
-            
+        if not result:
+            if os.path.exists(temp_path): os.remove(temp_path)
+            # Use 422 Unprocessable Entity for parsing failures (standardized)
+            return jsonify({"status": "error", "message": "Neural Engine could not decipher this payload. Please ensure the document is clear and high-resolution."}), 422
+
+        # Stage in session
+        session['last_scan_result'] = result
+        session['last_scan_text'] = text_content
+        session['last_scan_temp_file'] = temp_path
+        
+        return jsonify({
+            "status": "success",
+            "data": result,
+            "message": "Intelligence extracted successfully. Enter Review Portal."
+        })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Ingestion Failure: {str(e)}"}), 500
+
+@profile_bp.route('/api/confirm_save_doc', methods=['POST'])
+@login_required
+def confirm_save_doc():
+    """ 
+    Scan-Before-Store Stage 2: Controlled Persistence
+    Saves verified data and (optionally) the physical file.
+    """
+    data = request.json
+    save_file = data.get('save_file', False)
+    verified_data = data.get('verified_data', {})
+    doc_type = data.get('doc_type', 'Generic Document')
+    
+    if not verified_data:
+        return jsonify({"status": "error", "message": "No data found for confirmation."}), 400
+
+    try:
         from models import db, Document
+        import os
+        
+        # Update User Demographics if fields were edited in preview
+        current_user.name = verified_data.get('name', current_user.name)
+        current_user.phone = verified_data.get('phone', current_user.phone)
+        current_user.address = verified_data.get('address', current_user.address)
+        # Handle DOB if existing (may need model update if not exists, but assuming it's in preferences for now)
+        
+        # 2. Store structured data in preferences for Gemini context
+        text_payload = session.get('last_scan_text', '')
+        current_user.preferences = (current_user.preferences or "") + f"\n\n--- [{doc_type} Context] ---\n{text_payload}"
+        
+        filename_for_db = None
+        temp_path = session.get('last_scan_temp_file')
+
+        # Handle optional file saving
+        if save_file and temp_path and os.path.exists(temp_path):
+            user_vault = f"User_{current_user.id}_Vault"
+            vault_dir = os.path.join('static', 'uploads', 'documents', user_vault)
+            os.makedirs(vault_dir, exist_ok=True)
+            
+            final_filename = os.path.basename(temp_path).replace('temp_', '')
+            final_path = os.path.join(vault_dir, final_filename)
+            
+            import shutil
+            shutil.move(temp_path, final_path)
+            filename_for_db = f"{user_vault}/{final_filename}"
+        elif temp_path and os.path.exists(temp_path):
+            # User opted NOT to save physical file, purge it
+            os.remove(temp_path)
+
+        # Save structured document entity
         new_doc = Document(
             user_id=current_user.id,
             doc_type=doc_type,
-            filename=relative_path,
-            extracted_text=text.strip()
+            filename=filename_for_db if filename_for_db else "[LINKED_DATA_ONLY]",
+            extracted_text=text_payload
         )
         db.session.add(new_doc)
-        
-        current_user.preferences = (current_user.preferences or "") + f"\n\n--- [{doc_type} Context] ---\n{text.strip()}"
         db.session.commit()
         
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        # Clear Memory
+        session.pop('last_scan_result', None)
+        session.pop('last_scan_text', None)
+        session.pop('last_scan_temp_file', None)
         
-    return jsonify({"status": "success"})
+        return jsonify({"status": "success", "message": "Intelligence archived in secure vault."})
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Persistence Failure: {str(e)}"}), 500
+
+@profile_bp.route('/api/cancel_ingestion', methods=['POST'])
+@login_required
+def cancel_ingestion():
+    """ Wipes session memory and deletes temp buffered files """
+    temp_path = session.get('last_scan_temp_file')
+    if temp_path and os.path.exists(temp_path):
+        try:
+            os.remove(temp_path)
+        except:
+            pass
+            
+    session.pop('last_scan_result', None)
+    session.pop('last_scan_text', None)
+    session.pop('last_scan_temp_file', None)
+    
+    return jsonify({"status": "success", "message": "Memory purged."})
 
 
 @profile_bp.route('/api/delete_doc/<int:doc_id>', methods=['POST'])

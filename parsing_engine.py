@@ -60,13 +60,13 @@ def parse_text(text):
                 experience.append(line.strip())
             
     return {
-        "name": name if name else None,
-        "email": emails[0] if emails else None,
-        "phone": phones[0] if phones else None,
-        "date_of_birth": dobs[0] if dobs else None,
-        "address": address,
-        "education": list(set(education)), # Remove duplicates
-        "experience": list(set(experience))
+        "name": name if name else "",
+        "email": emails[0] if emails else "",
+        "phone": phones[0] if phones else "",
+        "date_of_birth": dobs[0] if dobs else "",
+        "address": address if address else "",
+        "education": list(set(education)) if education else [],
+        "experience": list(set(experience)) if experience else []
     }
 
 def parse_image(file_stream):

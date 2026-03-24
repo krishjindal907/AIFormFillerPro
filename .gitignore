@@ -28,3 +28,4 @@ static/uploads/
 # OS Files
 .DS_Store
 Thumbs.db
+tesseract-ocr-w64-setup-*.exe
