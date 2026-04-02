@@ -1,17 +1,28 @@
 {
   "manifest_version": 3,
-  "name": "AI Form Filler Pro",
-  "version": "1.0",
-  "description": "Magically fill any form on the web using your Universal Knowledge Vault & Gemini AI.",
+  "name": "NeoVault AI Form Filler",
+  "version": "2.0",
+  "description": "Instantly fill any form on the web using your NeoVault Knowledge Vault & Gemini AI.",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "NeoVault Autofill"
   },
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "storage"
   ],
   "host_permissions": [
     "http://127.0.0.1:5000/*",
-    "http://localhost:5000/*"
-  ]
+    "http://localhost:5000/*",
+    "<all_urls>"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }

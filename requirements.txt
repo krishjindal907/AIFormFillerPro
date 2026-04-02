@@ -6,3 +6,5 @@ PyPDF2==3.0.1
 google-genai==0.6.0
 beautifulsoup4
 requests
+pytest>=7.4.0
+pytest-mock>=3.12.0

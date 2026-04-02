@@ -1,0 +1,27 @@
+﻿.\app.py:1:1: F401 'os' imported but unused
+import os
+^
+.\models.py:1:1: F401 'json' imported but unused
+import json
+^
+.\parsing_engine.py:10:1: F401 'io' imported but unused
+import io
+^
+.\routes\core.py:1:1: F401 'flask.jsonify' imported but unused
+from flask import Blueprint, render_template, jsonify
+^
+.\routes\core.py:3:1: F401 'models.db' imported but unused
+from models import db, FormAnalysis, Feedback, Document
+^
+.\routes\core.py:3:1: F401 'models.Feedback' imported but unused
+from models import db, FormAnalysis, Feedback, Document
+^
+.\routes\profile.py:89:5: F841 local variable 'doc_type' is assigned to but never used
+    doc_type = request.form.get('doc_type', 'Generic Document')
+    ^
+.\routes\profile.py:218:22: F821 undefined name 'os'
+    if temp_path and os.path.exists(temp_path):
+                     ^
+.\routes\profile.py:220:13: F821 undefined name 'os'
+            os.remove(temp_path)
+            ^

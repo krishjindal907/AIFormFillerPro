@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template
 from flask_login import login_required, current_user
-from models import db, FormAnalysis, Feedback, Document
+from models import FormAnalysis, Document
 
 core_bp = Blueprint('core', __name__)
 

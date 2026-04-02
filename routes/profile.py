@@ -86,7 +86,6 @@ def upload_doc():
         return jsonify({"status": "error", "message": "No file uploaded"}), 400
         
     file = request.files['document']
-    doc_type = request.form.get('doc_type', 'Generic Document')
     
     if file.filename == '':
         return jsonify({"status": "error", "message": "No file selected"}), 400
@@ -214,6 +213,7 @@ def confirm_save_doc():
 @login_required
 def cancel_ingestion():
     """ Wipes session memory and deletes temp buffered files """
+    import os
     temp_path = session.get('last_scan_temp_file')
     if temp_path and os.path.exists(temp_path):
         try:
