@@ -1,0 +1,75 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+
+<header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+    <div>
+        <h1 style="color: white; margin: 0; font-size: 2rem;">Security & Activity Logs</h1>
+        <p style="color: #94a3b8; margin: 5px 0 0 0;">Global system audit trail and threat detection</p>
+    </div>
+</header>
+
+<div style="margin-bottom: 50px;">
+    <h2 style="color: white; font-size: 1.3rem; margin-bottom: 20px;"><i class="fa-solid fa-radar" style="color: #ef4444; margin-right: 10px;"></i> Advanced URL Threat Scans</h2>
+    <div class="admin-card" style="padding: 0; overflow: hidden;">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User ID</th>
+                    <th>Scanned URL Target</th>
+                    <th>Risk Analysis</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in scans %}
+                <tr>
+                    <td><span style="color: #64748b; font-size: 0.85rem; font-family: monospace;">{{ s.scanned_at.strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+                    <td style="color: white; font-weight: bold;">#{{ s.user_id }}</td>
+                    <td style="color: #60a5fa; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.url }}</td>
+                    <td>
+                        {% if s.risk_level == 'High' or s.risk_level == 'Phishing' %}
+                        <span style="color: #ef4444; font-weight: 800; background: rgba(239, 68, 68, 0.1); padding: 5px 10px; border-radius: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> {{ s.risk_level }}</span>
+                        {% else %}
+                        <span style="color: #10b981; font-weight: 800; background: rgba(16, 185, 129, 0.1); padding: 5px 10px; border-radius: 6px;"><i class="fa-solid fa-shield-check"></i> {{ s.risk_level }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align: center; padding: 40px; color: #64748b;"><i class="fa-solid fa-shield" style="font-size: 2rem; opacity: 0.5; margin-bottom: 10px; display: block;"></i> No security threat scans logged yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div>
+    <h2 style="color: white; font-size: 1.3rem; margin-bottom: 20px;"><i class="fa-solid fa-bolt" style="color: #10b981; margin-right: 10px;"></i> AI Form Parsing Activity</h2>
+    <div class="admin-card" style="padding: 0; overflow: hidden;">
+        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User ID</th>
+                    <th>Autofill Target URL</th>
+                    <th>Fields Processed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in forms %}
+                <tr>
+                    <td><span style="color: #64748b; font-size: 0.85rem; font-family: monospace;">{{ f.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+                    <td style="color: white; font-weight: bold;">#{{ f.user_id }}</td>
+                    <td style="color: #60a5fa;">{{ f.target_url or 'Local Document / Custom' }}</td>
+                    <td>
+                        <span style="color: #10b981; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 5px 10px; border-radius: 6px;">{{ f.fields_detected }} Fields</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align: center; padding: 40px; color: #64748b;"><i class="fa-solid fa-server" style="font-size: 2rem; opacity: 0.5; margin-bottom: 10px; display: block;"></i> No AI form interactions logged yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

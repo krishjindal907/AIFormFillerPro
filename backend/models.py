@@ -34,7 +34,7 @@ class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     doc_type = db.Column(db.String(100), nullable=False) # e.g., 'Aadhar Card', 'PAN Card', 'Marksheet', 'Generic'
-    filename = db.Column(db.String(255), nullable=False)
+    filename = db.Column(db.String(255), nullable=True)
     extracted_text = db.Column(db.Text, nullable=True)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -55,3 +55,11 @@ class Feedback(db.Model):
     form_analysis_id = db.Column(db.Integer, db.ForeignKey('form_analysis.id'), nullable=False)
     is_accurate = db.Column(db.Boolean, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class UrlScan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    url = db.Column(db.String(2048), nullable=False)
+    risk_level = db.Column(db.String(50), nullable=False)
+    flags = db.Column(db.Text, nullable=True) # store as JSON string
+    scanned_at = db.Column(db.DateTime, default=datetime.utcnow)

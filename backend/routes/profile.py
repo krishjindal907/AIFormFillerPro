@@ -61,19 +61,38 @@ def profile():
 @profile_bp.route('/api/profile/export', methods=['GET'])
 @login_required
 def export_profile():
+    import json
+    from flask import Response
+    from models import Document, FormAnalysis, UrlScan
+    
+    docs = Document.query.filter_by(user_id=current_user.id).all()
+    forms = FormAnalysis.query.filter_by(user_id=current_user.id).all()
+    scans = UrlScan.query.filter_by(user_id=current_user.id).all()
+    
     data = {
-        "name": current_user.name,
-        "email": current_user.email,
-        "phone": current_user.phone,
-        "age": current_user.age,
-        "gender": current_user.gender,
-        "address": current_user.address,
-        "profession": current_user.profession,
-        "education": current_user.education,
-        "skills": current_user.skills,
-        "preferences": current_user.preferences
+        "identity": {
+            "name": current_user.name,
+            "email": current_user.email,
+            "phone": current_user.phone,
+            "age": current_user.age,
+            "gender": current_user.gender,
+            "address": current_user.address,
+            "profession": current_user.profession,
+            "education": current_user.education,
+            "skills": current_user.skills,
+            "preferences": current_user.preferences
+        },
+        "vault_documents": [{"type": d.doc_type, "filename": d.filename, "text": d.extracted_text, "date": str(d.uploaded_at)} for d in docs],
+        "form_autofills": [{"url": f.target_url, "fields_detected": f.fields_detected, "date": str(f.timestamp)} for f in forms],
+        "url_scans": [{"url": s.url, "risk_level": s.risk_level, "date": str(s.scanned_at)} for s in scans]
     }
-    return jsonify(data)
+    
+    json_data = json.dumps(data, indent=4)
+    return Response(
+        json_data,
+        mimetype="application/json",
+        headers={"Content-Disposition": f"attachment;filename=NeoVault_{current_user.name or 'Export'}.json"}
+    )
 
 @profile_bp.route('/api/upload_doc', methods=['POST'])
 @login_required

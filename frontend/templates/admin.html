@@ -1,0 +1,147 @@
+{% extends 'admin_base.html' %}
+{% block content %}
+
+{% if not is_admin %}
+<div class="admin-card" style="max-width: 450px; margin: 0 auto; border-top: 4px solid #ef4444; width: 100%;">
+    <div style="text-align: center; margin-bottom: 25px;">
+        <i class="fa-solid fa-lock" style="font-size: 3rem; color: #ef4444;"></i>
+        <h2 style="margin-top: 15px; color: white; font-size: 1.5rem;">Restricted Admin Area</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Authentication required to access Core.</p>
+    </div>
+    <form method="POST" action="{{ url_for('admin.index') }}">
+        <div style="margin-bottom: 20px;">
+            <label style="color: #94a3b8; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1px;">Security Key</label>
+            <div style="position: relative;">
+                <i class="fa-solid fa-key" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
+                <input type="password" id="admin-pwd" name="password" placeholder="••••••••" required style="width: 100%; box-sizing: border-box; padding: 15px 45px 15px 45px; background: #020617; border: 1px solid #1e293b; color: white; border-radius: 8px; outline: none; font-size: 1rem; transition: 0.3s;" onfocus="this.style.borderColor='#ef4444'; this.style.boxShadow='0 0 0 3px rgba(239, 68, 68, 0.2)'" onblur="this.style.borderColor='#1e293b'; this.style.boxShadow='none'">
+                <i class="fa-solid fa-eye" id="toggle-admin-pwd" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #64748b; cursor: pointer; transition: 0.3s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'"></i>
+            </div>
+        </div>
+        <button type="submit" name="login" style="width: 100%; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Authenticate</button>
+    </form>
+    <div style="text-align: center; margin-top: 20px;">
+        <small style="color: #475569;">Default dev key: admin123</small>
+    </div>
+</div>
+{% else %}
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;">
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">{{ total_users }}</div>
+            </div>
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 10px;">
+                <i class="fa-solid fa-users" style="color: #3b82f6; font-size: 1.5rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="stat-label">Documents Secured</div>
+                <div class="stat-value">{{ global_stats.docs }}</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 10px;">
+                <i class="fa-solid fa-file-shield" style="color: #a855f7; font-size: 1.5rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="stat-label">Forms Analyzed</div>
+                <div class="stat-value">{{ global_stats.forms }}</div>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 12px; border-radius: 10px;">
+                <i class="fa-solid fa-bolt" style="color: #10b981; font-size: 1.5rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="stat-label">Threats Scanned</div>
+                <div class="stat-value">{{ global_stats.scans }}</div>
+            </div>
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 10px;">
+                <i class="fa-solid fa-radar" style="color: #ef4444; font-size: 1.5rem;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="user-table" class="admin-card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 20px 25px; border-bottom: 1px solid #1e293b; background: rgba(0,0,0,0.2);">
+        <h3 style="margin: 0; color: white; font-size: 1.1rem;"><i class="fa-solid fa-list-check" style="margin-right: 10px; color: #94a3b8;"></i> User Management Database</h3>
+    </div>
+    <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr>
+                <th>Account ID</th>
+                <th>User Details</th>
+                <th>Vault Data</th>
+                <th>AI Interactions</th>
+                <th style="text-align: right;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in users_data %}
+            <tr>
+                <td style="font-weight: bold; color: #94a3b8;">#{{ data.user.id }}</td>
+                <td>
+                    <div style="color: white; font-weight: 600; margin-bottom: 4px;">{{ data.user.name or 'Unnamed Identity' }}</div>
+                    <div style="color: #64748b; font-size: 0.85rem;"><i class="fa-regular fa-envelope" style="margin-right: 5px;"></i> {{ data.user.email }}</div>
+                </td>
+                <td>
+                    <div style="display: inline-flex; align-items: center; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">
+                        <span style="color: #a855f7; margin-right: 8px;"><i class="fa-solid fa-file-pdf"></i></span>
+                        <strong style="color: white;">{{ data.doc_count }}</strong> <span style="color: #64748b; margin-left: 5px;">Docs</span>
+                    </div>
+                </td>
+                <td>
+                    <div style="display: inline-flex; align-items: center; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">
+                        <span style="color: #10b981; margin-right: 8px;"><i class="fa-solid fa-robot"></i></span>
+                        <strong style="color: white;">{{ data.analysis_count }}</strong> <span style="color: #64748b; margin-left: 5px;">Logs</span>
+                    </div>
+                </td>
+                <td style="text-align: right;">
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=data.user.id) }}" onsubmit="return confirm('CRITICAL WARNING: Terminating account {{ data.user.email }} will permanently erase all associated documents, AI logs, and history. Proceed?');">
+                        <button type="submit" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.85rem;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">
+                            <i class="fa-solid fa-user-xmark" style="margin-right: 5px;"></i> Terminate
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if total_users == 0 %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                    <i class="fa-solid fa-database" style="font-size: 2rem; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+                    No identities found in the central vault.
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endif %}
+<script>
+    const toggleAdminPwd = document.getElementById('toggle-admin-pwd');
+    if (toggleAdminPwd) {
+        toggleAdminPwd.addEventListener('click', function() {
+            const pwd = document.getElementById('admin-pwd');
+            if(pwd.type === 'password') {
+                pwd.type = 'text';
+                this.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                this.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    }
+</script>
+
+{% endblock %}

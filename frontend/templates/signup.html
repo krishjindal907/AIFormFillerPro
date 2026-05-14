@@ -44,16 +44,7 @@
             {% endif %}
         {% endwith %}
 
-        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-            <button type="button" class="social-btn"><i class="fa-brands fa-github" style="font-size: 1.1rem;"></i> GitHub</button>
-            <button type="button" class="social-btn"><i class="fa-brands fa-google" style="font-size: 1.1rem;"></i> Google</button>
-        </div>
 
-        <div style="display: flex; align-items: center; margin: 20px 0; color: #475569;">
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
-            <span style="padding: 0 15px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">or register an email</span>
-            <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
-        </div>
 
         <form method="POST" action="{{ url_for('auth.signup') }}" id="register-form">
             <div style="margin-bottom: 15px;">
@@ -66,7 +57,10 @@
             </div>
             <div style="margin-bottom: 25px;">
                 <label class="dev-label">Create Security PIN</label>
-                <input type="password" name="password" class="dev-input" required placeholder="••••••••">
+                <div style="position: relative;">
+                    <input type="password" id="password-field" name="password" class="dev-input" required placeholder="••••••••" style="padding-right: 40px;">
+                    <i class="fa-solid fa-eye" id="toggle-password" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'"></i>
+                </div>
             </div>
             
             <button type="submit" class="dev-btn" id="signup-btn">
@@ -86,6 +80,19 @@
         document.getElementById("signup-btn").addEventListener("click", function(e) {
             if(document.getElementById("register-form").checkValidity()) {
                 this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Securing Vault...';
+            }
+        });
+        
+        document.getElementById('toggle-password').addEventListener('click', function() {
+            const pwd = document.getElementById('password-field');
+            if(pwd.type === 'password') {
+                pwd.type = 'text';
+                this.classList.replace('fa-eye', 'fa-eye-slash');
+                this.style.color = '#3b82f6';
+            } else {
+                pwd.type = 'password';
+                this.classList.replace('fa-eye-slash', 'fa-eye');
+                this.style.color = '#94a3b8';
             }
         });
     </script>

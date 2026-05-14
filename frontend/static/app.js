@@ -76,13 +76,45 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const formData = new FormData();
             const isUrl = urlGroup.style.display !== 'none';
+            let targetUrl = '';
+            
             if(isUrl) {
-                formData.append('url', document.getElementById('form_url').value);
+                targetUrl = document.getElementById('form_url').value;
+                formData.append('url', targetUrl);
             } else {
                 formData.append('html_content', document.getElementById('form_html').value);
             }
             
             try {
+                // NEW: SCAN THE URL FIRST
+                if (isUrl && targetUrl) {
+                    btn.innerHTML = '<i class="fa-solid fa-shield-halved fa-beat"></i> Scanning URL for Threats...';
+                    const scanRes = await fetch('/api/vault/scan-url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: targetUrl })
+                    });
+                    
+                    if (scanRes.ok) {
+                        const scanData = await scanRes.json();
+                        if (!scanData.is_safe && scanData.risk_level === 'dangerous') {
+                            alert("🚨 MALICIOUS LINK DETECTED 🚨\n\nRisk Level: " + scanData.risk_level.toUpperCase() + "\nFlags: " + scanData.flags.join(", ") + "\n\nAuto-fill aborted for your safety.");
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            return; // Stop execution
+                        } else if (!scanData.is_safe && scanData.risk_level === 'suspicious') {
+                            const proceed = confirm("⚠️ SUSPICIOUS LINK DETECTED ⚠️\n\nRisk Level: " + scanData.risk_level.toUpperCase() + "\nFlags: " + scanData.flags.join(", ") + "\n\nDo you still want to proceed with auto-fill?");
+                            if (!proceed) {
+                                btn.innerHTML = originalText;
+                                btn.disabled = false;
+                                return; // Stop execution
+                            }
+                        }
+                    }
+                }
+
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Form Structure...';
+
                 const res = await fetch('/api/fetch_form', {
                     method: 'POST',
                     body: formData

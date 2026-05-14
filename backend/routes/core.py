@@ -26,16 +26,4 @@ def delete_history(history_id):
 
 @core_bp.route('/mock')
 def mock():
-    return """
-    <html>
-    <body>
-    <h1>External Job Application</h1>
-    <form>
-        <label for="fname">Full Name</label><br><input type="text" id="fname" name="fname"><br><br>
-        <label>Contact Mobile</label><br><input type="tel" name="mobile"><br><br>
-        <label>Years Old</label><br><input type="number" name="age"><br><br>
-        <label>Job Title / Profession</label><br><input type="text" name="job">
-    </form>
-    </body>
-    </html>
-    """
+    return render_template('mock_application.html')

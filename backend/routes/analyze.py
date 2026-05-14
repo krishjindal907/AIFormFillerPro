@@ -46,11 +46,11 @@ def match_field_to_profile(field_label, field_name, user):
         'gender':     ['gender', 'sex'],
         'address':    ['address', 'location', 'street', 'city', 'state', 'pincode', 'zip'],
         'profession': ['profession', 'job', 'occupation', 'role', 'title', 'designation'],
-        'education':  ['education', 'degree', 'university', 'college', 'school', 'qualification'],
+        'education':  ['education', 'degree', 'university', 'college', 'school', 'qualification', 'cgpa'],
         'skills':     ['skills', 'technologies', 'expertise', 'competencies'],
         'father_name':['father', 'fathers name', "father's name"],
         'mother_name':['mother', 'mothers name', "mother's name"],
-        'preferences':['preferences', 'diet', 'hobbies', 'interests'],
+        'preferences':['preferences', 'diet', 'hobbies', 'interests', 'linkedin', 'github', 'project', 'projects'],
     }
 
     best_match = None
@@ -66,7 +66,34 @@ def match_field_to_profile(field_label, field_name, user):
 
     if best_match:
         val = getattr(user, best_match, '')
+        
+        # Advanced Offline Extraction Hack
+        if best_match == 'preferences':
+            import re
+            if 'linkedin' in text:
+                match = re.search(r'linkedin\.com[^\s\n]+', val, re.I)
+                if match: return 'linkedin', 80, "https://" + match.group(0)
+            elif 'github' in text:
+                match = re.search(r'github\.com[^\s\n]+', val, re.I)
+                if match: return 'github', 80, "https://" + match.group(0)
+            elif 'project' in text:
+                match = re.search(r'Projects:\s*(.*)', val, re.I)
+                if match: return 'project', 80, match.group(1)
+                
+        if best_match == 'education':
+            import re
+            if 'cgpa' in text:
+                match = re.search(r'CGPA:\s*([\d\.]+)', val, re.I)
+                if match: return 'cgpa', 80, match.group(1)
+            elif 'university' in text or 'college' in text:
+                if 'University' in val: return 'university', 80, val.split(',')[-1].strip()
+        
         if val:
+            if best_match == 'name':
+                if 'first' in text or 'fname' in text:
+                    return best_match, best_score, val.split(' ')[0]
+                if 'last' in text or 'lname' in text:
+                    return best_match, best_score, val.split(' ')[-1] if len(val.split(' ')) > 1 else ''
             return best_match, best_score, str(val)
 
     return None, 0, ''

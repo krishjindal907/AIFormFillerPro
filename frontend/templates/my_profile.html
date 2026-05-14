@@ -100,6 +100,7 @@
     <div style="display: flex; gap: 15px;">
         <button onclick="document.getElementById('parser-modal').style.display='flex'" class="btn btn-outline" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; border-color: #6366f1; font-weight: 800; padding: 12px 24px; font-size: 1rem;"><i class="fa-solid fa-microchip"></i> Smart Parser</button>
         <button onclick="document.getElementById('edit-modal').style.display='flex'" class="btn btn-outline" style="background: white; border-color: var(--border-color); font-weight: 800; padding: 12px 24px; font-size: 1rem;"><i class="fa-solid fa-pen-nib"></i> Map Identity</button>
+        <a href="{{ url_for('profile.export_profile') }}" class="btn" style="background: var(--accent); color: white; font-weight: 800; padding: 12px 24px; font-size: 1rem; text-decoration: none; border-radius: 8px;"><i class="fa-solid fa-download"></i> Data Export</a>
         <button onclick="window.print()" class="btn btn-primary" style="font-weight: 800; padding: 12px 24px; font-size: 1rem; box-shadow: 0 4px 15px rgba(0,65,121,0.2);"><i class="fa-solid fa-print"></i> Print Dossier</button>
     </div>
 </div>

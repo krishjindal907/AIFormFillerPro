@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Optional fallback if fontawesome is needed, but we use svg -->
+</head>
+<body>
+    <div class="container">
+        
+        <div class="header">
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+            </div>
+            <div class="header-text">
+                <h2 class="title">NEOVAULT CORE</h2>
+                <div class="badge">E2E SECURE</div>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <div class="status-indicator"></div>
+            <div class="status-text">Connection Established</div>
+        </div>
+
+        <p class="subtitle">Neural network ready to map local vault data into current DOM structure.</p>
+        
+        <button id="autofill-btn" class="btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Execute Auto-Fill Sequence
+        </button>
+        
+        <p id="status-msg" class="status"></p>
+
+        <div class="footer">
+            Local SQLite DB &bull; Privacy First
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

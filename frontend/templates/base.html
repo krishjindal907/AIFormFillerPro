@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,9 @@
     
     <title>NeoVault Dashboard Core</title>
     <!-- Fonts & CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -39,6 +41,9 @@
                 </a>
                 <a href="{{ url_for('analyze.analyze_view') }}" class="nav-link {{ 'active' if request.endpoint == 'analyze.analyze_view' else '' }}">
                     <i class="fa-solid fa-wand-sparkles"></i> AI Form Analyzer
+                </a>
+                <a href="{{ url_for('scanner.scanner_ui') }}" class="nav-link {{ 'active' if request.endpoint == 'scanner.scanner_ui' else '' }}">
+                    <i class="fa-solid fa-shield-virus"></i> Link Scanner
                 </a>
                 <a href="{{ url_for('auth.logout') }}" class="nav-link" style="color: var(--danger); margin-top: 20px;">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout

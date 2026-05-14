@@ -10,8 +10,12 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "contextMenus"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "host_permissions": [
     "http://127.0.0.1:5000/*",
     "http://localhost:5000/*",
@@ -19,10 +23,5 @@
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  },
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
   }
 }

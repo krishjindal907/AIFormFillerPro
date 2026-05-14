@@ -1,0 +1,3 @@
+Name: Alice Johnson
+Email: alice@example.com
+DOB: 01/01/1990

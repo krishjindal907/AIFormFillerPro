@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Command Center - NeoVault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 0; background: #020617; font-family: 'Inter', sans-serif; }
+        .admin-sidebar { background: #0f172a; border-right: 1px solid #1e293b; width: 260px; height: 100vh; position: fixed; display: flex; flex-direction: column; }
+        .admin-content { margin-left: 260px; padding: 30px; background: #020617; min-height: 100vh; box-sizing: border-box; width: calc(100% - 260px); }
+        .admin-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        .stat-value { font-size: 2.5rem; font-weight: 800; color: #f8fafc; margin: 10px 0 0 0; }
+        .stat-label { color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .nav-link-admin { padding: 15px 25px; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 15px; transition: 0.3s; font-weight: 600; }
+        .nav-link-admin:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-link-admin.active { border-left: 4px solid #ef4444; background: rgba(239,68,68,0.1); color: #f8fafc; }
+        .admin-table th { padding: 15px; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #1e293b; }
+        .admin-table td { padding: 18px 15px; border-bottom: 1px solid #1e293b; color: #e2e8f0; }
+        .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    </style>
+</head>
+<body>
+    <div style="display: flex;">
+        {% if is_admin %}
+        <aside class="admin-sidebar">
+            <div style="padding: 30px 25px; text-align: center; border-bottom: 1px solid #1e293b;">
+                <i class="fa-solid fa-server" style="font-size: 2.5rem; color: #ef4444; margin-bottom: 15px;"></i>
+                <h2 style="color: white; margin: 0; font-size: 1.2rem; font-weight: 800;">NEOVAULT CORE</h2>
+                <span style="color: #ef4444; font-size: 0.75rem; font-weight: bold; letter-spacing: 2px;">SYSTEM ADMIN</span>
+            </div>
+            <nav style="padding: 20px 0; flex: 1;">
+                <a href="{{ url_for('admin.index') }}" class="nav-link-admin {% if request.endpoint == 'admin.index' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie" style="width: 20px; text-align: center;"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin.index') }}#user-table" class="nav-link-admin">
+                    <i class="fa-solid fa-users-gear" style="width: 20px; text-align: center;"></i> Manage Users
+                </a>
+                <a href="{{ url_for('admin.logs') }}" class="nav-link-admin {% if request.endpoint == 'admin.logs' %}active{% endif %}">
+                    <i class="fa-solid fa-shield-virus" style="width: 20px; text-align: center;"></i> Security Logs
+                </a>
+                <a href="{{ url_for('core.index') }}" class="nav-link-admin" style="margin-top: 30px; color: #60a5fa;">
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="width: 20px; text-align: center;"></i> Open App
+                </a>
+            </nav>
+            <div style="padding: 20px;">
+                <a href="{{ url_for('admin.logout') }}" style="display: block; text-align: center; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444'">
+                    <i class="fa-solid fa-lock"></i> Lock Terminal
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <main class="admin-content" {% if not is_admin %}style="margin:0; width:100%; display:flex; align-items:center; justify-content:center;"{% endif %}>
+            
+            {% if is_admin %}
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div>
+                    <h1 style="color: white; margin: 0; font-size: 2rem;">Command Center</h1>
+                    <p style="color: #94a3b8; margin: 5px 0 0 0;">Real-time system overview and management</p>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: pulse 2s infinite;"></span> SYSTEM OPTIMAL
+                    </span>
+                </div>
+            </header>
+            {% endif %}
+            
+            <style>@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }</style>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+                            <i class="fa-solid fa-circle-check"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

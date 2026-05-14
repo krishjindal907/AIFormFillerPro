@@ -1,17 +1,24 @@
+import os
 from dotenv import load_dotenv
-load_dotenv()
+dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+load_dotenv(dotenv_path)
 
 from flask import Flask, request
 from models import db, User
 from flask_login import LoginManager
+from limiter import limiter
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
+    import os
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'database.db')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     app.config['SECRET_KEY'] = 'dev-secret-key-123-v2'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    limiter.init_app(app)
 
     @app.after_request
     def add_cors_headers(response):
@@ -36,6 +43,8 @@ def create_app():
     from routes.analyze import analyze_bp
     from routes.autofill import autofill_bp
     from routes.parsing import parsing_bp
+    from routes.scanner import scanner_bp
+    from routes.admin import admin_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(core_bp)
@@ -43,6 +52,8 @@ def create_app():
     app.register_blueprint(analyze_bp)
     app.register_blueprint(autofill_bp)
     app.register_blueprint(parsing_bp)
+    app.register_blueprint(scanner_bp)
+    app.register_blueprint(admin_bp)
 
     with app.app_context():
         # Create database tables if they do not exist

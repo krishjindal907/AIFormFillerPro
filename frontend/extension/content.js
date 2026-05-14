@@ -239,3 +239,129 @@
         );
     }
 })();
+
+// === NEOVAULT URL SCANNER MODULE ===
+
+let activeToast = null;
+
+function showScannerToast(message, color, detailsHTML = "") {
+    if (activeToast) activeToast.remove();
+    
+    activeToast = document.createElement('div');
+    
+    let bg = 'linear-gradient(135deg, #3b82f6, #1d4ed8)'; // default blue
+    if (color === 'green') bg = 'linear-gradient(135deg, #10b981, #059669)';
+    if (color === 'red') bg = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+    if (color === 'yellow') bg = 'linear-gradient(135deg, #f59e0b, #d97706)';
+    
+    activeToast.innerHTML = `
+        <div style="font-family: monospace; font-size: 14px;"><strong>NeoVault Scanner</strong></div>
+        <div style="font-size: 13px; margin-top: 5px;">${message}</div>
+        ${detailsHTML}
+    `;
+    
+    activeToast.style.cssText = `
+        position: fixed; top: 20px; right: 20px;
+        background: ${bg};
+        color: white; padding: 15px 20px; border-radius: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        z-index: 2147483647;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.2);
+        max-width: 350px;
+        word-break: break-all;
+    `;
+    
+    document.body.appendChild(activeToast);
+    
+    if (color !== 'yellow') {
+        setTimeout(() => {
+            if (activeToast) activeToast.remove();
+        }, 6000);
+    }
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "scan_start") {
+        showScannerToast("Scanning target:<br>" + request.url, "yellow");
+    } else if (request.action === "scan_result") {
+        const d = request.data;
+        let color = "green";
+        let msg = "Level: SAFE";
+        if (d.risk_level === "dangerous") { color = "red"; msg = "Level: DANGEROUS!"; }
+        else if (d.risk_level === "suspicious") { color = "yellow"; msg = "Level: SUSPICIOUS"; }
+        
+        let details = `<div style="margin-top:8px; font-size:12px; background:rgba(0,0,0,0.2); padding:5px; border-radius:4px;">`;
+        details += `Score: ${d.risk_score}/100<br>`;
+        d.flags.forEach(f => {
+            details += `• ${f}<br>`;
+        });
+        details += `</div>`;
+        
+        showScannerToast(msg + "<br><small>" + request.url + "</small>", color, details);
+    } else if (request.action === "scan_error") {
+        showScannerToast("Error:<br>" + request.error, "red");
+    }
+});
+
+// PASSIVE MODE ROUTINE
+(async function initPassiveMode() {
+    const links = Array.from(document.querySelectorAll('a[href]'));
+    if (links.length === 0) return;
+    
+    const urls = [];
+    const linkMap = new Map();
+    
+    // Only capture absolute http/https
+    links.forEach(el => {
+        const href = el.href;
+        if (href.startsWith('http')) {
+            urls.push(href);
+            if (!linkMap.has(href)) linkMap.set(href, []);
+            linkMap.get(href).push(el);
+        }
+    });
+    
+    if (urls.length === 0) return;
+    
+    // Deduplicate array
+    const dedupedUrls = [...new Set(urls)];
+    
+    try {
+        const res = await fetch("http://127.0.0.1:5000/api/vault/scan-urls-batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ urls: dedupedUrls })
+        });
+        
+        const data = await res.json();
+        if (data.results) {
+            for (const [url, status] of Object.entries(data.results)) {
+                const els = linkMap.get(url);
+                if (!els) continue;
+                
+                let color = '#10b981'; // safe
+                if (status === 'dangerous') color = '#ef4444';
+                if (status === 'suspicious') color = '#f59e0b';
+                
+                els.forEach(el => {
+                    const dot = document.createElement('span');
+                    dot.title = "NeoVault: " + status.toUpperCase();
+                    dot.style.cssText = `
+                        display: inline-block;
+                        width: 8px; height: 8px;
+                        background-color: ${color};
+                        border-radius: 50%;
+                        margin-left: 4px;
+                        box-shadow: 0 0 5px ${color};
+                        vertical-align: middle;
+                    `;
+                    el.insertAdjacentElement('afterend', dot);
+                });
+            }
+        }
+    } catch(err) {
+        console.warn("NeoVault Passive Scan Error:", err);
+    }
+})();

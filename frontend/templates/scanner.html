@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .scanner-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(16, 185, 129, 0.05);
+        backdrop-filter: blur(10px);
+        color: #e2e8f0;
+    }
+    
+    .scanner-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .scanner-header h2 {
+        font-family: 'Courier New', Courier, monospace;
+        color: #10b981;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        letter-spacing: 1px;
+    }
+
+    .terminal-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: #000;
+        border: 2px solid #334155;
+        border-radius: 8px;
+        padding: 5px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .terminal-input-wrapper:focus-within {
+        border-color: #10b981;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .terminal-prefix {
+        color: #10b981;
+        font-family: monospace;
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+
+    .terminal-input {
+        background: transparent;
+        border: none;
+        color: #10b981;
+        font-family: monospace;
+        font-size: 1.1rem;
+        width: 100%;
+        outline: none;
+        padding: 10px 0;
+    }
+    
+    .terminal-input::placeholder {
+        color: #475569;
+    }
+
+    .scan-btn {
+        background: #10b981;
+        color: #000;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-left: 10px;
+    }
+
+    .scan-btn:hover {
+        background: #059669;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    }
+
+    .progress-bar-container {
+        display: none;
+        margin-top: 20px;
+        background: #1e293b;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #10b981;
+        box-shadow: 0 0 10px #10b981;
+        transition: width 0.1s linear;
+    }
+
+    .result-card {
+        display: none;
+        margin-top: 30px;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #334155;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .risk-badge {
+        font-family: monospace;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .risk-safe { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .risk-suspicious { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+    .risk-dangerous { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+    .score-gauge {
+        font-size: 2rem;
+        font-weight: 900;
+        font-family: monospace;
+    }
+
+    .flags-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .flags-list li {
+        padding: 10px;
+        background: #1e293b;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 3px solid #3b82f6;
+    }
+    
+    .history-table {
+        width: 100%;
+        margin-top: 40px;
+        border-collapse: collapse;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .history-table th, .history-table td {
+        padding: 12px;
+        border-bottom: 1px solid #334155;
+        text-align: left;
+    }
+
+    .history-table th {
+        color: #94a3b8;
+        background: rgba(15, 23, 42, 0.5);
+    }
+    
+    .history-table tr:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+</style>
+
+<div class="scanner-container">
+    <div class="scanner-header">
+        <h2><i class="fa-solid fa-satellite-dish"></i> NEO_VAULT URL VERIFIER v2.0</h2>
+        <p style="color: #64748b;">Execute heuristic analysis on remote targets.</p>
+    </div>
+
+    <div class="terminal-input-wrapper">
+        <span class="terminal-prefix">root@neo:~# url_scan</span>
+        <input type="text" id="target-url" class="terminal-input" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+        <button id="btn-scan" class="scan-btn">EXECUTE</button>
+    </div>
+
+    <div class="progress-bar-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="result-card" id="result-card">
+        <div class="result-header">
+            <div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px;">THREAT ASSESSMENT</div>
+                <div class="risk-badge" id="risk-badge">SAFE</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px;">RISK SCORE</div>
+                <div class="score-gauge" id="risk-score">0<span style="font-size:1rem;color:#64748b;">/100</span></div>
+            </div>
+        </div>
+        
+        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">HEURISTIC FLAGS <span id="flag-count"></span></div>
+        <ul class="flags-list" id="flags-list">
+        </ul>
+        
+        <div style="margin-top: 15px; font-size: 0.75rem; color: #475569; text-align: right;">
+            Scan ID: <span id="scan-timestamp"></span>
+        </div>
+    </div>
+
+    {% if history %}
+    <h3 style="margin-top: 50px; color: #94a3b8; font-family: monospace; border-bottom: 1px solid #334155; padding-bottom: 10px;">RECENT EXECUTIONS</h3>
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>TIMESTAMP</th>
+                <th>TARGET</th>
+                <th>STATUS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scan in history %}
+            <tr>
+                <td style="color: #64748b;">{{ scan.scanned_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ scan.url }}</td>
+                <td>
+                    {% if scan.risk_level == 'safe' %}
+                    <span style="color: #10b981;">[SAFE]</span>
+                    {% elif scan.risk_level == 'suspicious' %}
+                    <span style="color: #f59e0b;">[WARN]</span>
+                    {% else %}
+                    <span style="color: #ef4444;">[CRIT]</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('btn-scan').addEventListener('click', async () => {
+    const url = document.getElementById('target-url').value;
+    if (!url) return;
+
+    const btn = document.getElementById('btn-scan');
+    const progContainer = document.getElementById('progress-container');
+    const progBar = document.getElementById('progress-bar');
+    const resCard = document.getElementById('result-card');
+    
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    resCard.style.display = 'none';
+    progContainer.style.display = 'block';
+    
+    // Animate progress bar
+    let width = 0;
+    const interval = setInterval(() => {
+        width += Math.random() * 15;
+        if (width > 90) width = 90;
+        progBar.style.width = width + '%';
+    }, 100);
+
+    try {
+        const response = await fetch('/api/vault/scan-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        
+        const data = await response.json();
+        
+        clearInterval(interval);
+        progBar.style.width = '100%';
+        
+        setTimeout(() => {
+            progContainer.style.display = 'none';
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            
+            if (data.error) {
+                alert("Error: " + data.error);
+                return;
+            }
+            
+            // Populate results
+            const badge = document.getElementById('risk-badge');
+            badge.innerText = data.risk_level;
+            badge.className = 'risk-badge risk-' + data.risk_level;
+            
+            const scoreEl = document.getElementById('risk-score');
+            scoreEl.innerHTML = data.risk_score + '<span style="font-size:1rem;color:#64748b;">/100</span>';
+            
+            let color = '#10b981';
+            if (data.risk_score >= 50) color = '#ef4444';
+            else if (data.risk_score > 0) color = '#f59e0b';
+            scoreEl.style.color = color;
+            
+            const list = document.getElementById('flags-list');
+            list.innerHTML = '';
+            document.getElementById('flag-count').innerText = `(${data.flags.length})`;
+            
+            data.flags.forEach(flag => {
+                const li = document.createElement('li');
+                li.innerText = flag;
+                if(data.risk_level === 'dangerous') li.style.borderLeftColor = '#ef4444';
+                else if(data.risk_level === 'suspicious') li.style.borderLeftColor = '#f59e0b';
+                else li.style.borderLeftColor = '#10b981';
+                list.appendChild(li);
+            });
+            
+            document.getElementById('scan-timestamp').innerText = new Date(data.scanned_at).toLocaleString();
+            
+            // Show card
+            resCard.style.display = 'block';
+            
+        }, 500);
+
+    } catch (err) {
+        clearInterval(interval);
+        progContainer.style.display = 'none';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        alert('Connection error. Please try again.');
+    }
+});
+
+// Allow Enter key to trigger scan
+document.getElementById('target-url').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        document.getElementById('btn-scan').click();
+    }
+});
+</script>
+{% endblock %}

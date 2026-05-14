@@ -5,9 +5,9 @@ echo ===================================================
 echo   Starting NeoVault OSINT Server (Local Network)
 echo ===================================================
 
-cd /d "D:\coading\projects\AIFormFillerPro"
-if exist "venv\Scripts\activate.bat" (
-    call venv\Scripts\activate.bat
+cd /d "%~dp0"
+if exist ".venv\Scripts\activate.bat" (
+    call .venv\Scripts\activate.bat
 )
 
 echo.
@@ -21,5 +21,5 @@ echo.
 echo DO NOT CLOSE THIS WINDOW if you want the link to work.
 echo Press [Ctrl + C] to shut down safely.
 echo ===================================================
-python app.py
+python backend\app.py
 pause

@@ -54,7 +54,10 @@
         <h1 class="page-title" style="margin-bottom: 5px;"><i class="fa-solid fa-house-chimney" style="color: var(--primary);"></i> Central Dashboard</h1>
         <p style="color: var(--text-secondary); margin: 0; font-weight: 600; font-size: 1.05rem;">Welcome back. Here is your digitized asset overview.</p>
     </div>
-    <a href="{{ url_for('profile.profile') }}" class="btn btn-primary" style="padding: 14px 28px; box-shadow: 0 6px 20px rgba(0,65,121,0.25); border-radius: 8px; font-weight: 800; font-size: 1.05rem;"><i class="fa-solid fa-cloud-arrow-up"></i> Append New Document</a>
+    <div style="display: flex; gap: 15px;">
+        <a href="{{ url_for('core.mock') }}" target="_blank" class="btn btn-outline" style="padding: 14px 24px; border-radius: 8px; font-weight: 800; font-size: 1rem; border: 2px solid var(--primary); color: var(--primary); background: rgba(0, 161, 255, 0.05); text-decoration: none;"><i class="fa-solid fa-flask"></i> Test Extension</a>
+        <a href="{{ url_for('profile.profile') }}" class="btn btn-primary" style="padding: 14px 24px; box-shadow: 0 6px 20px rgba(0,65,121,0.25); border-radius: 8px; font-weight: 800; font-size: 1rem; text-decoration: none;"><i class="fa-solid fa-cloud-arrow-up"></i> Append Document</a>
+    </div>
 </div>
 
 <!-- TOP METRICS -->
