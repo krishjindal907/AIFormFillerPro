@@ -19,7 +19,7 @@ database.db
 instance/
 
 # User Uploads & Vaults (Critical Security)
-static/uploads/
+backend/static/uploads/
 
 # IDE Configs
 .vscode/
