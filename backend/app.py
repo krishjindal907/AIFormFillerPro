@@ -7,9 +7,11 @@ from flask import Flask, request
 from models import db, User
 from flask_login import LoginManager
 from limiter import limiter
+from flask_wtf.csrf import CSRFProtect
 
 def create_app():
     app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
+    csrf = CSRFProtect(app)
     import os
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance', 'database.db')
     os.makedirs(os.path.dirname(db_path), exist_ok=True)

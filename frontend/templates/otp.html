@@ -42,6 +42,7 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('auth.otp_verify') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div style="margin-bottom: 25px;">
                 <label class="dev-label">6-DIGIT SECURITY TOKEN</label>
                 <input type="text" name="otp" class="dev-input" required maxlength="6" autocomplete="off" autofocus placeholder="------">

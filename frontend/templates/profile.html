@@ -133,8 +133,16 @@
         fd.append('doc_type', document.getElementById('doc_type_select').value);
         fd.append('document', fileInput.files[0]);
         
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
         try {
-            const res = await fetch('/api/upload_doc', { method: 'POST', body: fd });
+            const res = await fetch('/api/upload_doc', { 
+                method: 'POST', 
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: fd 
+            });
             const result = await res.json();
             if(result.status === 'success') {
                 const data = result.data;
@@ -198,9 +206,13 @@
         };
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             const res = await fetch('/api/confirm_save_doc', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
@@ -220,9 +232,15 @@
 
     async function cancelIngestion() {
         if(confirm("Discard all extracted intelligence and purge memory?")) {
-            try {
-                await fetch('/api/cancel_ingestion', { method: 'POST' });
-            } catch(e) {}
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            await fetch('/api/cancel_ingestion', { 
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+        } catch(e) {}
             window.location.reload();
         }
     }

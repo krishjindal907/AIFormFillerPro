@@ -48,6 +48,7 @@
 
 
         <form method="POST" action="{{ url_for('auth.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div style="margin-bottom: 15px;">
                 <label class="dev-label">Email Address</label>
                 <input type="email" name="email" class="dev-input" required placeholder="developer@neovault.io">

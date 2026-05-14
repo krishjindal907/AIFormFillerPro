@@ -13,3 +13,4 @@ python-dotenv
 opencv-python
 numpy
 pytesseract
+Flask-WTF==1.2.1

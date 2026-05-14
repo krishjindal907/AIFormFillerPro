@@ -272,9 +272,13 @@ document.getElementById('btn-scan').addEventListener('click', async () => {
     }, 100);
 
     try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         const response = await fetch('/api/vault/scan-url', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
             body: JSON.stringify({ url })
         });
         

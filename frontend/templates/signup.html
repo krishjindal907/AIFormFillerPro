@@ -47,6 +47,7 @@
 
 
         <form method="POST" action="{{ url_for('auth.signup') }}" id="register-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div style="margin-bottom: 15px;">
                 <label class="dev-label">Full Name</label>
                 <input type="text" name="name" class="dev-input" required placeholder="John Doe">

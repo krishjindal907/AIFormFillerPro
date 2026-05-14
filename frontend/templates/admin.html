@@ -9,6 +9,7 @@
         <p style="color: #64748b; font-size: 0.9rem;">Authentication required to access Core.</p>
     </div>
     <form method="POST" action="{{ url_for('admin.index') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div style="margin-bottom: 20px;">
             <label style="color: #94a3b8; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; display: block; text-transform: uppercase; letter-spacing: 1px;">Security Key</label>
             <div style="position: relative;">
@@ -108,6 +109,7 @@
                 </td>
                 <td style="text-align: right;">
                     <form method="POST" action="{{ url_for('admin.delete_user', user_id=data.user.id) }}" onsubmit="return confirm('CRITICAL WARNING: Terminating account {{ data.user.email }} will permanently erase all associated documents, AI logs, and history. Proceed?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; font-weight: 600; font-size: 0.85rem;" onmouseover="this.style.background='#ef4444'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#ef4444'">
                             <i class="fa-solid fa-user-xmark" style="margin-right: 5px;"></i> Terminate
                         </button>

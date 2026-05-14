@@ -89,9 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // NEW: SCAN THE URL FIRST
                 if (isUrl && targetUrl) {
                     btn.innerHTML = '<i class="fa-solid fa-shield-halved fa-beat"></i> Scanning URL for Threats...';
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     const scanRes = await fetch('/api/vault/scan-url', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
                         body: JSON.stringify({ url: targetUrl })
                     });
                     
@@ -115,8 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Form Structure...';
 
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const res = await fetch('/api/fetch_form', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
                     body: formData
                 });
                 const data = await res.json();
@@ -378,9 +386,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
             
             try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 await fetch('/api/feedback', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
                     body: JSON.stringify({
                         analysis_id: currentAnalysisId,
                         is_accurate: isAccurate

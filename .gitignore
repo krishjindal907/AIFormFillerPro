@@ -29,3 +29,8 @@ static/uploads/
 .DS_Store
 Thumbs.db
 tesseract-ocr-w64-setup-*.exe
+
+# Testing Artifacts
+backend/otp_test.txt
+backend/qa_report.json
+backend/qa_test.txt

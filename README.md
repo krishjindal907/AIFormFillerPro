@@ -1,85 +1,76 @@
-<div align="center">
-  
-# ⚡ NeoVault Intelligence Platform
-**An advanced, ultra-secure, AI-driven Personal Document & Autofill Architecture.**
+# NeoVault / AIFormFillerPro 🛡️🤖
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.x-lightgrey.svg)](https://flask.palletsprojects.com/)
-[![SQLite3](https://img.shields.io/badge/Database-SQLite3-green.svg)](https://www.sqlite.org/index.html)
-[![AI](https://img.shields.io/badge/Engine-Google_Gemini-orange.svg)](https://deepmind.google/technologies/gemini/)
+**The Ultimate Intelligence-Driven Document Vault & Form Autofill Engine.**
 
-</div>
+NeoVault is a premium, high-security web application designed to eliminate the friction of repetitive form filling. Using cutting-edge **Gemini AI**, NeoVault parses your sensitive documents (Resumes, ID Cards, Certificates) locally in-memory, maps the data to your secure intelligence profile, and provides autonomous autofill capabilities for any external web form.
 
 ---
 
-## 🚀 System Architecture Overview
+## 🚀 Key Features
 
-NeoVault is a high-fidelity document storage and intelligence suite engineered to securely hold personal credentials while utilizing Google's advanced **Gemini LLM** to instantaneously scan and auto-fill complex web forms via physical URL extraction.
-
-The platform was built with a fanatical focus on **Premium SaaS Aesthetics**, featuring deep neon-glow glassmorphism, mathematical hardware telemetry algorithms, and enterprise-grade security protocols.
-
-### 🛡️ Core Capabilities
-
-- **Mathematical 2FA Auth Pipeline:** True session security. All standard Logins and new identity Registrations are gated behind dynamic, cryptographically secure 6-digit OTP verification sequences dispatched natively via an asynchronous `smtplib` SSL pipeline to the user's registered email.
-- **Biometric Password Recovery:** A comprehensive 3-stage password recovery gateway utilizing OTP tokens and temporary session storage to safely mutate the underlying SHA256 hashed PINs.
-- **Isolated Node Storage:** All physical PDF payloads are scrubbed and written directly into dynamically generated, mathematically isolated `/User_{ID}_Vault/` server sub-directories for pristine organizational hierarchy. No more dumping files into generic folders.
-- **Neural Data Parsing Engine:** A heavyweight NLP extraction layer capable of stripping structured identity arrays (Name, Phone, Email, Location, Education, Experience) from unstructured plaintext and remote URLs.
-- **Computer Vision OCR:** Powered by OpenCV and Tesseract, the platform can physically "see" and extract text characters from uploaded JPG/PNG images in real-time.
-- **Intelligence Assessor Modal:** An aggressively styled, dual-pane UI Terminal that renders physical document scans alongside a "Hacker-Themed CRT Matrix" text-dump, exposing exactly what the Gemini Engine has OCR extracted from the payload.
-- **Global Form Interceptor:** Via the included **NeoVault Chrome Extension**, the software instantly bridges the local SQLite3 database with any live website (including complex SPA frameworks like React) to seamlessly map profile data into third-party HTML schemas.
+- **Intelligence Ingestion Node**: Military-grade OCR and LLM-powered document parsing. Upload PDFs or Images and watch the AI extract your legal identity vectors.
+- **Autonomous Context Form-Fill**: Deploy an AI agent into any external form viewport. It intelligently maps your vault data to form fields with 99% accuracy.
+- **Cybersecurity Scanner**: Integrated heuristic URL scanner to detect phishing and malicious links before you interact with them.
+- **2FA Security Matrix**: OTP-based login and high-entropy session management.
+- **Privacy First Architecture**: Scan-before-store logic. Temporary file handling ensures no data is persisted without explicit user authorization.
+- **Admin Command Center**: Complete oversight of system activity, user management, and threat logs.
 
 ---
 
-## 💻 Elite Tech Stack
+## 🛠️ Tech Stack
 
-*   **Backend Engine:** Python 3, Flask, Werkzeug
-*   **Database Matrix:** SQLAlchemy, SQLite3 (Local persistence)
-*   **Vision & OCR:** OpenCV (Image Preprocessing), Tesseract OCR, PyPDF2
-*   **Security Layers:** Flask-Login, Werkzeug Password Hashing (`pbkdf2:sha256`), SMTP-SSL Mail Delivery
-*   **Intelligence:** `google-genai` (Gemini Flash Vectors), `BeautifulSoup4` (URL Scraping)
-*   **Frontend UI:** Pure HTML5, Vanilla JavaScript, Advanced CSS3 (Glassmorphism, CSS Grid/Flexbox, Radial Gradients)
-*   **Progressive Web App:** Fully installable mobile PWA architecture (`sw.js`, `manifest.json`)
+- **Backend**: Python 3.x, Flask, SQLAlchemy (SQLite)
+- **AI Core**: Google Gemini 2.0 Flash API (GenAI)
+- **Security**: Flask-WTF (CSRF), Flask-Limiter (Rate Limiting), Strict SSRF Protection
+- **Parsing**: PyTesseract (OCR), PDFPlumber, OpenCV
+- **Frontend**: Dark Glassmorphism UI, Vanilla JS, CSS3, FontAwesome 6
 
 ---
 
-## ⚙️ Initializing the Node (Local Deployment)
+## 📥 Installation & Setup
 
-To boot up the NeoVault local testing environment, execute the following protocols:
-
-### 1. External OCR Engine (Required for Image Scanning)
-You MUST install the physical Tesseract binary on your host machine:
-1. Download from: [UB-Mannheim Tesseract Releases](https://github.com/UB-Mannheim/tesseract/wiki)
-2. Ensure it is installed at: `C:\Program Files\Tesseract-OCR\tesseract.exe`
-
-### 2. Dependency Initialization
-Ensure you have Python installed, then build your virtual environment:
+### 1. Clone the Repository
 ```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+git clone https://github.com/krishjindal907/AIFormFillerPro.git
+cd AIFormFillerPro
 ```
 
-### 3. Configure Environment Vectors
-Create a `.env` file in the root directory and inject your highly sensitive API configurations:
-```ini
-# Google Gemini API Matrix Key
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Required for 2FA / Password Recovery Live Email Dispatch
-MAIL_USERNAME=your_gmail_address@gmail.com
-MAIL_PASSWORD=your_16_digit_google_app_password
+### 2. Environment Configuration
+Create a `.env` file in the root directory:
+```env
+GEMINI_API_KEY=your_google_gemini_key
+SECRET_KEY=generate_a_random_secret
+ADMIN_PASSWORD=admin123
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
 ```
 
-### 4. Ignition
-Using the custom-built Windows Bootloader:
-Double click `Start_NeoVault.bat` 
-*This will automatically resolve directory contexts, spin up the backend WSGI instance, and aggressively pop open your default browser to intercept the `0.0.0.0:5000` payload.*
-
-Alternatively, run manually:
+### 3. Install Dependencies
 ```bash
+pip install -r backend/requirements.txt
+```
+
+### 4. Initialize Database & Run
+```bash
+cd backend
 python app.py
 ```
+Access the dashboard at `http://127.0.0.1:5000`
 
 ---
 
-*Engineered with precision.*
+## 🔒 Security Posture
+- **CSRF Protection**: Every form and API call is signed with unique tokens.
+- **SSRF Hardening**: Strict validation of remote URLs; local/private network access is blocked.
+- **Rate Limiting**: Brute-force protection on all auth and scanning endpoints.
+- **Data Isolation**: Files are processed in sandboxed directories and purged upon session destruction.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+**Developed with ❤️ by Krish Jindal**

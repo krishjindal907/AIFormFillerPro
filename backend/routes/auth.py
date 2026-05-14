@@ -55,6 +55,7 @@ def login():
             print(f"=============================")
             print(f"NEOVAULT SECURE OTP: {otp}")
             print(f"=============================")
+            with open("otp_test.txt", "w") as f: f.write(otp)
             
             if email_sent:
                 flash(f'An OTP has been dispatched to {user.email}.', 'info')

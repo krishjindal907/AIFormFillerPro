@@ -6,7 +6,42 @@ from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required, current_user
 from models import db, FormAnalysis
 
+import socket
+from urllib.parse import urlparse
+from parsing_engine import parse_text, parse_pdf, parse_url, parse_image
+
 analyze_bp = Blueprint('analyze', __name__)
+
+# [SECURITY] Strict SSRF Protection Utility
+def is_safe_url(url):
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ['http', 'https']:
+            return False, "Invalid scheme. Only HTTP/HTTPS allowed."
+            
+        hostname = parsed.hostname
+        if not hostname:
+            return False, "Invalid hostname."
+            
+        # Block localhost and common private IP patterns directly
+        if hostname.lower() in ['localhost', '127.0.0.1', '0.0.0.0', '[::1]']:
+            return False, "Access to local resources is strictly prohibited."
+            
+        # Resolve IP to check for private ranges
+        ip = socket.gethostbyname(hostname)
+        ip_parts = [int(x) for x in ip.split('.')]
+        
+        # RFC1918 Private Ranges
+        if (ip_parts[0] == 10 or 
+            (ip_parts[0] == 172 and 16 <= ip_parts[1] <= 31) or 
+            (ip_parts[0] == 192 and ip_parts[1] == 168) or
+            ip_parts[0] == 127 or
+            ip_parts[0] == 169 and ip_parts[1] == 254): # Link-local
+            return False, "Access to internal network addresses is restricted."
+            
+        return True, None
+    except Exception:
+        return False, "DNS resolution failed or malformed URL."
 
 
 def build_vault_context(user):
@@ -178,12 +213,26 @@ def fetch_form():
     html_content = request.form.get('html_content')
 
     if url:
+        # [SECURITY] SSRF Validation
+        is_safe, error_msg = is_safe_url(url)
+        if not is_safe:
+            return jsonify({"error": error_msg}), 403
+
         try:
             headers = {'User-Agent': 'Mozilla/5.0'}
-            res = requests.get(url, headers=headers, timeout=8)
-            html = res.text
+            # [SECURITY] Added Timeout and Stream for size limit
+            res = requests.get(url, headers=headers, timeout=8, stream=True)
+            
+            # [SECURITY] Response Size Limit (Max 2MB for forms)
+            content = b""
+            for chunk in res.iter_content(chunk_size=1024):
+                content += chunk
+                if len(content) > 2 * 1024 * 1024:
+                    return jsonify({"error": "Payload too large. Source exceeds 2MB limit."}), 413
+            
+            html = content.decode('utf-8', errors='ignore')
         except Exception as e:
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": f"Connection Refused: {str(e)}"}), 400
     elif html_content:
         html = html_content
     else:
@@ -288,10 +337,24 @@ def proxy():
     if not url:
         return "No URL provided", 400
 
+    # [SECURITY] SSRF Validation
+    is_safe, error_msg = is_safe_url(url)
+    if not is_safe:
+        return f"Access Denied: {error_msg}", 403
+
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        res = requests.get(url, headers=headers, timeout=10)
-        html = res.text
+        # [SECURITY] Added Timeout and Stream for size limit
+        res = requests.get(url, headers=headers, timeout=10, stream=True)
+        
+        # [SECURITY] Response Size Limit (Max 5MB for proxy)
+        content = b""
+        for chunk in res.iter_content(chunk_size=1024):
+            content += chunk
+            if len(content) > 5 * 1024 * 1024:
+                return "Payload too large. Restricted by NeoVault Security Policy.", 413
+        
+        html = content.decode('utf-8', errors='ignore')
 
         if '<head>' in html:
             html = html.replace('<head>', f'<head><base href="{url}">', 1)

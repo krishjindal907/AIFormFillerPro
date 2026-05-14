@@ -8,7 +8,37 @@ from models import db, UrlScan
 from datetime import datetime
 from limiter import limiter
 
+import socket
+
 scanner_bp = Blueprint('scanner', __name__)
+
+# [SECURITY] SSRF Protection Utility
+def is_safe_url(url):
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ['http', 'https']:
+            return False, "Invalid scheme. Only HTTP/HTTPS allowed."
+            
+        hostname = parsed.hostname
+        if not hostname:
+            return False, "Invalid hostname."
+            
+        if hostname.lower() in ['localhost', '127.0.0.1', '0.0.0.0', '[::1]']:
+            return False, "Access to local resources is restricted."
+            
+        ip = socket.gethostbyname(hostname)
+        ip_parts = [int(x) for x in ip.split('.')]
+        
+        if (ip_parts[0] == 10 or 
+            (ip_parts[0] == 172 and 16 <= ip_parts[1] <= 31) or 
+            (ip_parts[0] == 192 and ip_parts[1] == 168) or
+            ip_parts[0] == 127 or
+            ip_parts[0] == 169 and ip_parts[1] == 254):
+            return False, "Internal network scanning is prohibited."
+            
+        return True, None
+    except Exception:
+        return False, "DNS resolution failed."
 
 # Load blocklist
 BLOCKLIST_FILE = os.path.join(os.path.dirname(__file__), '..', 'blocklist.json')
@@ -47,6 +77,11 @@ def scan_url():
 
     raw_url = data['url'].strip()
     
+    # [SECURITY] SSRF Validation
+    is_safe, error_msg = is_safe_url(raw_url)
+    if not is_safe:
+        return jsonify({"error": f"Security Block: {error_msg}"}), 403
+
     # Validation
     parsed = urlparse(raw_url)
     if not parsed.scheme or not parsed.netloc:
