@@ -51,7 +51,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div style="margin-bottom: 15px;">
                 <label class="dev-label">Email Address</label>
-                <input type="email" name="email" class="dev-input" required placeholder="developer@neovault.io">
+                <input type="email" name="email" class="dev-input" required placeholder="Enter your email">
             </div>
             <div style="margin-bottom: 25px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -59,13 +59,13 @@
                     <a href="{{ url_for('auth.forgot_password') }}" style="color: #60a5fa; font-size: 0.75rem; text-decoration: none;">Forgot password?</a>
                 </div>
                 <div style="position: relative;">
-                    <input type="password" id="password-field" name="password" class="dev-input" required placeholder="••••••••" style="padding-right: 40px;">
+                    <input type="password" id="password-field" name="password" class="dev-input" required placeholder="Enter your password" style="padding-right: 40px;">
                     <i class="fa-solid fa-eye" id="toggle-password" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#94a3b8'"></i>
                 </div>
             </div>
             
             <button type="submit" class="dev-btn">
-                Sign In <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
+                Sign In & Access Vault <i class="fa-solid fa-arrow-right" style="margin-left: 5px;"></i>
             </button>
         </form>
         

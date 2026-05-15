@@ -43,7 +43,7 @@ SECRET_KEY=generate_a_random_secret
 ADMIN_PASSWORD=admin123
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your_email@gmail.com
+MAIL_USERNAME=codejindal404@gmail.com
 MAIL_PASSWORD=your_app_password
 ```
 

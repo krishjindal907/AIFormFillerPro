@@ -13,7 +13,7 @@ def send_otp_email(to_email, otp, context_type="Authentication"):
     sender_email = os.environ.get('MAIL_USERNAME')
     sender_password = os.environ.get('MAIL_PASSWORD')
     
-    if not sender_email or not sender_password or sender_email == "your_email@gmail.com":
+    if not sender_email or not sender_password or sender_email == "REPLACE_WITH_YOUR_EMAIL":
         print(">> SMTP credentials missing in .env! Skipping real email dispatch.")
         return False
         

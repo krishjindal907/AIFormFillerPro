@@ -8,8 +8,8 @@ def test_export_profile_authorized(auth_client):
     res = auth_client.get('/api/profile/export')
     assert res.status_code == 200
     data = res.json
-    assert data["name"] == "Test User"
-    assert data["phone"] == "1234567890"
+    assert data["identity"]["name"] == "Test User"
+    assert data["identity"]["phone"] == "1234567890"
 
 def test_edit_profile(auth_client, test_app):
     with test_app.app_context():
